@@ -6,6 +6,7 @@ import ViewPost from './views/ViewPost.vue';
 
 const routes = [
   { path: '/', component: Home },
+  { path: '/posts', component: Home },
   { path: '/posts/create', component: CreatePost, name: 'CreatePost' },
   { path: '/posts/edit/:id', component: EditPost, name: 'EditPost' },
   { path: '/posts/:id', component: ViewPost, name: 'ViewPost' },

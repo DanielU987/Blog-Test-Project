@@ -1,31 +1,62 @@
 <template>
-    <div>
-      <h2>{{ post.title }}</h2>
+  <div>
+    <h2>Просмотр поста</h2>
+    <div v-if="post">
+      <h3>{{ post.title }}</h3>
       <p>{{ post.content }}</p>
-      <!-- Дополнительная информация о посте -->
+      <button class="btn btn-danger" @click="deletePost">Удалить пост</button>
     </div>
-  </template>
-  
-  <script>
-  import axios from 'axios';
-  
-  export default {
-    data() {
-      return {
-        postId: this.$route.params.id,
-        post: {},
-      };
-    },
-    created() {
-      // Загрузка информации о посте для просмотра
-      axios.get(`/api/posts/${this.postId}`)
-        .then(response => {
+    <div v-else>
+      <p>Пост не найден</p>
+    </div>
+  </div>
+</template>
+
+<script>
+import axios from "axios";
+
+export default {
+  data() {
+    return {
+      post: null,
+    };
+  },
+  mounted() {
+    this.fetchPost();
+  },
+  methods: {
+    fetchPost() {
+      const postId = this.$route.params.id;
+      axios
+        .get(`http://localhost:3000/api/posts/${postId}`)
+        .then((response) => {
           this.post = response.data;
         })
-        .catch(error => {
+        .catch((error) => {
+          if (error.response && error.response.status === 404) {
+            // Обработка ошибки 404 (пост не найден)
+            this.post = null;
+          } else {
+            console.error(error);
+          }
+        });
+    },
+    deletePost() {
+      const postId = this.$route.params.id;
+      axios
+        .delete(`http://localhost:3000/api/posts/${postId}`)
+        .then(() => {
+          // Перенаправление на страницу со списком постов после удаления
+          this.$router.push({ path: "/posts" });
+        })
+        .catch((error) => {
           console.error(error);
         });
     },
-  };
-  </script>
-  
+  },
+};
+</script>
+
+<style scoped>
+/* Стили компонента, если необходимо */
+</style>
