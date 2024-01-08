@@ -1,22 +1,47 @@
-const express = require('express');
+const express = require("express");
 const app = express();
-const cors = require('cors')
+const cors = require("cors");
+const session = require("express-session");
+const pgSession = require("connect-pg-simple")(session);
+const { Pool } = require("pg");  // Обратите внимание на это место
+
 const corsOptions = {
-  origin: 'http://localhost:8080',  // Замените на ваш фактический адрес Vue-приложения
+  origin: "http://localhost:8080",
   optionsSuccessStatus: 200,
 };
+
 // Подключаем роутер
-const mainRouter = require('./routes/index');
-const postsRouter = require('./routes/posts');
+const mainRouter = require("./routes/index");
+const postsRouter = require("./routes/posts");
+
 // Позволяет Express парсить JSON-запросы
 app.use(express.json());
 
-app.use(cors(corsOptions))
+// Создаем объект Pool для использования в connect-pg-simple
+const pool = new Pool({
+  user: 'postgres',
+  host: 'localhost',
+  database: 'blogdb',
+  password: '123',
+  port: 5432,
+});
+
+app.use(
+  session({
+    store: new pgSession({
+      pool: pool,  // Используем созданный объект Pool здесь
+    }),
+    secret: "EhLYTtYI72FVN1ucXOJAFnxXonFap4o9",
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
+app.use(cors(corsOptions));
+
 // Использует роутер для обработки маршрутов
-app.use('/', mainRouter);
-app.use('/api/posts', postsRouter);
-
-
+app.use("/", mainRouter);
+app.use("/api/posts", postsRouter);
 
 const port = 3000;
 app.listen(port, () => {

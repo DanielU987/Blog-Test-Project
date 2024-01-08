@@ -1,17 +1,17 @@
 <template>
   <div>
-    <h2>Список постов</h2>
-    <ul>
-      <li v-for="post in posts" :key="post.id">
+    <div class="card col-3" style="width: 18rem;" v-for="post in posts" :key="post.id">
+      <img src="#" class="card-img-top" alt="...">
+      <div class="card-body">
         <h3>{{ post.title }}</h3>
-        <p>{{ post.content }}</p>
-      </li>
-    </ul>
+        <p class="card-text">{{ post.content }}</p>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-import axios from 'axios';
+import db from '@/../../server/db';
 export default {
   data() {
     return {
@@ -22,19 +22,12 @@ export default {
     this.fetchPosts();
   },
   methods: {
-    fetchPosts() {
-      // Получение списка постов с сервера
-      // Здесь используем API маршруты, например /api/posts
-      axios
-        .get("/api/posts")
-        .then((response) => {
-          // Обработка успешного ответа от сервера
-          this.posts = response.data;
-        })
-        .catch((error) => {
-          // Обработка ошибки
-          console.error(error);
-        });
+    async fetchPosts() {
+      try {
+        this.posts = await db.getAllPosts();
+      } catch (error) {
+        console.error(error);
+      }
     },
   },
 };

@@ -1,55 +1,72 @@
 const express = require('express');
 const router = express.Router();
-
-// Пример базы данных в памяти (для демонстрации)
-let posts = [
-  { id: 1, title: 'Заголовок поста 1', content: 'Содержание поста 1' },
-  { id: 2, title: 'Заголовок поста 2', content: 'Содержание поста 2' },
-  // Другие посты...
-];
+const db = require('../db');
 
 // Получение списка всех постов
-router.get('/', (req, res) => {
-  res.json(posts);
+router.get('/', async (req, res) => {
+  try {
+    const posts = await db.any('SELECT * FROM posts');
+    res.json(posts);
+  } catch (error) {
+    console.error('Ошибка при получении постов:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
 
 // Получение информации о конкретном посте
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
   const postId = parseInt(req.params.id);
-  const post = posts.find(post => post.id === postId);
-
-  if (post) {
+  try {
+    const post = await db.one('SELECT * FROM posts WHERE id = $1', [postId]);
     res.json(post);
-  } else {
+  } catch (error) {
+    console.error('Ошибка при получении поста:', error);
     res.status(404).json({ error: 'Пост не найден' });
   }
 });
 
 // Создание нового поста
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const newPost = req.body;
-  newPost.id = posts.length + 1;
-  posts.push(newPost);
-
-  res.status(201).json(newPost);
+  try {
+    const result = await db.one('INSERT INTO posts(title, content) VALUES($1, $2) RETURNING *', [
+      newPost.title,
+      newPost.content,
+    ]);
+    res.status(201).json(result);
+  } catch (error) {
+    console.error('Ошибка при создании поста:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
 
 // Обновление информации о посте
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
   const postId = parseInt(req.params.id);
   const updatedPost = req.body;
-
-  posts = posts.map(post => (post.id === postId ? updatedPost : post));
-
-  res.json(updatedPost);
+  try {
+    const result = await db.one('UPDATE posts SET title = $1, content = $2 WHERE id = $3 RETURNING *', [
+      updatedPost.title,
+      updatedPost.content,
+      postId,
+    ]);
+    res.json(result);
+  } catch (error) {
+    console.error('Ошибка при обновлении поста:', error);
+    res.status(404).json({ error: 'Пост не найден' });
+  }
 });
 
 // Удаление поста
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   const postId = parseInt(req.params.id);
-  posts = posts.filter(post => post.id !== postId);
-
-  res.json({ message: 'Пост успешно удален' });
+  try {
+    await db.none('DELETE FROM posts WHERE id = $1', [postId]);
+    res.json({ message: 'Пост успешно удален' });
+  } catch (error) {
+    console.error('Ошибка при удалении поста:', error);
+    res.status(404).json({ error: 'Пост не найден' });
+  }
 });
 
 module.exports = router;
