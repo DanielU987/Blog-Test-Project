@@ -27,35 +27,38 @@ router.get('/:id', async (req, res) => {
 
 // Создание нового поста
 router.post('/', async (req, res) => {
-  const newPost = req.body;
+  const { title, content, image } = req.body;
+
   try {
-    const result = await db.one('INSERT INTO posts(title, content) VALUES($1, $2) RETURNING *', [
-      newPost.title,
-      newPost.content,
+    const result = await db.one('INSERT INTO posts (title, content, picture) VALUES ($1, $2, $3) RETURNING *', [
+      title,
+      content,
+      Buffer.from(image, 'base64'), // Преобразуйте строку с данными изображения в бинарный буфер
     ]);
-    res.status(201).json(result);
+    res.json(result);
   } catch (error) {
     console.error('Ошибка при создании поста:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: 'Ошибка сервера' });
   }
 });
+
 
 // Обновление информации о посте
 router.put('/:id', async (req, res) => {
   const postId = parseInt(req.params.id);
-  const updatedPost = req.body;
+  const { title, content, image } = req.body;
+  console.log("necoc"+postId,title,content,image)
   try {
-    const result = await db.one('UPDATE posts SET title = $1, content = $2 WHERE id = $3 RETURNING *', [
-      updatedPost.title,
-      updatedPost.content,
-      postId,
-    ]);
-    res.json(result);
+    const result = await db.query('UPDATE posts SET title=$1, content=$2, picture=$3 WHERE id=$4 RETURNING *', [title, content,image, postId]);
+
+    const updatedRow = result[0];
+    res.json(updatedRow);
   } catch (error) {
-    console.error('Ошибка при обновлении поста:', error);
-    res.status(404).json({ error: 'Пост не найден' });
+    console.error('Error updating post:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
 
 // Удаление поста
 router.delete('/:id', async (req, res) => {

@@ -4,6 +4,7 @@
     <div v-if="post">
       <h3>{{ post.title }}</h3>
       <p>{{ post.content }}</p>
+      <img :src="getPostImage(post)" class="card-img-top" alt="Post Image">
       <button class="btn btn-danger" @click="deletePost">Удалить пост</button>
     </div>
     <div v-else>
@@ -52,6 +53,13 @@ export default {
         .catch((error) => {
           console.error(error);
         });
+    },
+    getPostImage(post) {
+      if (post.picture && post.picture.type === 'Buffer') {
+        const bufferData = Buffer.from(post.picture.data);
+        return `data:image/png;base64,${bufferData.toString('base64')}`;
+      }
+      return ''; // You can provide a default image or handle the case when there is no image
     },
   },
 };

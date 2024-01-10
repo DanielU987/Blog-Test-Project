@@ -4,16 +4,20 @@ const cors = require("cors");
 const session = require("express-session");
 const pgSession = require("connect-pg-simple")(session);
 const { Pool } = require("pg");  // Обратите внимание на это место
+const bodyParser = require('body-parser');
 
 const corsOptions = {
   origin: "http://localhost:8080",
   optionsSuccessStatus: 200,
 };
 
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+
 // Подключаем роутер
 const mainRouter = require("./routes/index");
 const postsRouter = require("./routes/posts");
-
+const authRouter = require('./routes/auth');
 // Позволяет Express парсить JSON-запросы
 app.use(express.json());
 
@@ -42,6 +46,7 @@ app.use(cors(corsOptions));
 // Использует роутер для обработки маршрутов
 app.use("/", mainRouter);
 app.use("/api/posts", postsRouter);
+app.use('/api/auth', authRouter);
 
 const port = 3000;
 app.listen(port, () => {

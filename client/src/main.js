@@ -3,7 +3,7 @@ import App from './App.vue';
 import router from './router'; // Импортируйте ваш маршрутизатор
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.bundle.js';
-import Header from './components/Header.vue';
+import Header from './views/Header.vue';
 
 const app = createApp(App);
 
