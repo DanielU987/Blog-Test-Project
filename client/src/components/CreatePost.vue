@@ -1,47 +1,84 @@
 <template>
-  <div>
-    <h2>Создать пост</h2>
-    <form @submit.prevent="submitForm">
-      <!-- Добавьте поле для выбора файла -->
-      <label for="image">Изображение:</label>
-      <input type="file" id="image" accept="image/*" @change="handleImageChange" required />
+  <div class="submit-form">
+    <div class="form-group">
+      <label for="title">Заголовок</label>
+      <input
+        type="text"
+        class="form-control"
+        id="title"
+        required
+        v-model="post.title"
+        name="title"
+      />
+    </div>
 
-      <label for="title">Заголовок:</label>
-      <input type="text" id="title" v-model="post.title" required />
+    <div class="form-group">
+      <label for="content">Содержание</label>
+      <input
+        class="form-control"
+        id="content"
+        required
+        v-model="post.content"
+        name="content"
+      />
+    </div>
 
-      <label for="content">Содержание:</label>
-      <textarea id="content" v-model="post.content" required></textarea>
-      <button class="btn btn-primary" type="submit">Создать пост</button>
-    </form>
+    <label for="image">Изображение:</label>
+    <input
+      type="file"
+      id="image"
+      accept="image/*"
+      @change="handleImageChange"
+    />
+
+    <button @click="savePost" class="btn btn-success">Submit</button>
   </div>
 </template>
 
 <script>
-import axios from "axios";
+import PostService from "../services/post.service";
+import { mapState } from "vuex";
 
 export default {
+  computed: {
+    ...mapState("auth", ["loggedIn", "user"]),
+    loggedIn() {
+      return this.$store.state.auth.status.loggedIn;
+    },
+  },
   data() {
     return {
       post: {
         title: "",
         content: "",
-        image: null, // Добавьте поле для хранения выбранного изображения
+        image: null,
       },
     };
   },
   methods: {
-    submitForm() {
-      // Преобразуйте изображение в строку base64 перед отправкой на сервер
-      const imageBase64 = this.post.image ? this.post.image.split(',')[1] : null;
-      console.log("coc3"+imageBase64)
-      axios
-        .post("/api/posts", { ...this.post, image: imageBase64 })
+    savePost() {
+      if (!this.loggedIn) {
+        // Пользователь не вошел в систему
+        console.log("User not logged in");
+        return;
+      }
+
+      var data = {
+        title: this.post.title,
+        content: this.post.content,
+        image: this.post.image,
+
+        userId: this.user.id,
+      };
+
+      PostService.create(data)
         .then((response) => {
+          this.post.id = response.data.id;
           console.log(response.data);
-          this.$router.push("/posts");
+          this.$router.push("/posts/");
         })
-        .catch((error) => {
-          console.error(error);
+        .catch((e) => {
+          console.log(e);
         });
     },
     handleImageChange(event) {
@@ -49,7 +86,8 @@ export default {
       if (file) {
         const reader = new FileReader();
         reader.onload = (e) => {
-          this.post.image = e.target.result;
+          const base64Data = e.target.result.split(',')[1];
+          this.post.image = base64Data;
         };
         reader.readAsDataURL(file);
       }

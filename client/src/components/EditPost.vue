@@ -17,23 +17,26 @@
       />
 
       <!-- Display the existing image if it exists -->
-      <div v-if="post.picture">
+      <div v-if="post.image">
         <label>Текущее изображение:</label>
         <img
           :src="getPostImage(post)"
+          v-on="post.image"
           class="card-img-top"
           alt="Post Image"
           style="max-width: 100%"
         />
       </div>
-
-      <button type="submit">Сохранить изменения</button>
+      <button class="btn btn-danger" @click="deletePost" >
+        Удалить пост
+      </button>
+      <button class="btn btn-success" @click="updatePost">Сохранить изменения</button>
     </form>
   </div>
 </template>
 
 <script>
-import axios from "axios";
+import PostService from '../services/post.service';
 
 export default {
   data() {
@@ -48,48 +51,62 @@ export default {
   },
   created() {
     // Load existing post data for editing
-    this.loadPost();
+    const postId = this.$route.params.id;
+    const userId = this.$store.state.auth.user.id;
+    this.getPost(postId, userId);
   },
   methods: {
-    async loadPost() {
-      try {
-        const response = await axios.get(`/api/posts/${this.postId}`);
-        this.post = response.data;
-      } catch (error) {
-        console.error(error);
-      }
-    },
-    async submitForm() {
-      const imageBase64 = this.post.image ? this.post.image.split(",")[1]: null;
-
-      try {
-        // Use the extracted base64-encoded string directly
-        const response = await axios.put(`/api/posts/${this.postId}`, {...this.post,image: imageBase64,
+    getPost(postId, userId) {
+      PostService.get(postId, userId)
+        .then((response) => {
+          this.post = response.data.post;
+          this.canEditPost = response.data.userPostFound;
+          console.log(response.data);
+        })
+        .catch((e) => {
+          console.log(e);
         });
-        this.$router.push(`/posts/${this.postId}`);
-      } catch (error) {
-        console.error(error);
-        // Handle errors, provide feedback to the user
-      }
+    },
+    updatePost() {
+      PostService.update(this.post.id, this.post, )
+        .then(response => {
+          console.log(response.data);
+          this.$router.push("/posts/");
+          this.message = 'The post was updated successfully!';
+        })
+        .catch(e => {
+          console.log(e);
+        });
+    },
+    deletePost() {
+      PostService.delete(this.post.id)
+        .then(response => {
+          console.log(response.data);
+          this.$router.push("/posts/");
+        })
+        .catch(e => {
+          console.log(e);
+        });
     },
     handleImageChange(event) {
       const file = event.target.files[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = (e) => {
-          this.post.image = e.target.result;
+          const base64Data = e.target.result.split(',')[1];
+          this.post.image = base64Data;
         };
         reader.readAsDataURL(file);
       }
     },
     getPostImage(post) {
-      if (post.picture && post.picture.type === "Buffer") {
-        const bufferData = Buffer.from(post.picture.data);
-        return `data:${post.picture.type};base64,${bufferData.toString(
-          "base64"
-        )}`;
+      if (post.image && post.image.type === "Buffer") {
+        const bufferData = Buffer.from(post.image.data);
+        return `data:image/png;base64, ${bufferData}`;
       }
-      return ""; // You can provide a default image or handle the case when there is no image
+      else{
+        return `data:image/png;base64, ${post.image}`;
+      }
     },
   },
 };

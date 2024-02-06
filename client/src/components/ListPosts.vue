@@ -12,7 +12,8 @@
 </template>
 
 <script>
-import axios from 'axios';
+import PostService from "../services/post.service";
+
 
 export default {
   data() {
@@ -21,21 +22,39 @@ export default {
     };
   },
   mounted() {
-    this.fetchPosts();
+    this.retrievePosts();
   },
   methods: {
-    async fetchPosts() {
-      try {
-        const response = await axios.get('/api/posts'); // Путь к вашему API
-        this.posts = response.data;
-      } catch (error) {
-        console.error(error);
-      }
+    retrievePosts() {
+      PostService.getAll()
+        .then(response => {
+          this.posts = response.data;
+          console.log(response.data);
+        })
+        .catch(e => {
+          console.log(e);
+        });
     },
+
+    refreshList() {
+      this.retrievePosts();
+    },
+
+    removeAllPosts() {
+      PostService.deleteAll()
+        .then(response => {
+          console.log(response.data);
+          this.refreshList();
+        })
+        .catch(e => {
+          console.log(e);
+        });
+    },
+    
     getPostImage(post) {
-      if (post.picture && post.picture.type === 'Buffer') {
-        const bufferData = Buffer.from(post.picture.data);
-        return `data:image/png;base64,${bufferData.toString('base64')}`;
+      if (post.image && post.image.type === 'Buffer') {
+        const bufferData = Buffer.from(post.image.data);
+        return `data:image/png;base64, ${bufferData}`;
       }
       return ''; // You can provide a default image or handle the case when there is no image
     },

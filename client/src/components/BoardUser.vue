@@ -1,25 +1,23 @@
 <template>
-  <div>
-    <PostList />
+  <div class="container">
+    <header class="jumbotron">
+      <h3>{{ content }}</h3>
+    </header>
   </div>
 </template>
 
 <script>
-import PostList from "@/components/ListPosts.vue";
 import UserService from "../services/user.service";
 
 export default {
-  name: "Home",
-  components: {
-    PostList,
-  },
+  name: "User",
   data() {
     return {
-      content: "", // Initialize content in data
+      content: "",
     };
   },
   mounted() {
-    UserService.getPublicContent().then(
+    UserService.getUserBoard().then(
       (response) => {
         this.content = response.data;
       },
@@ -35,7 +33,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-/* Стили компонента, если необходимо */
-</style>
