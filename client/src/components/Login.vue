@@ -1,29 +1,24 @@
 <template>
-  <div class="col-md-12">
-    <div class="card card-container">
-      <img
-        id="profile-img"
-        src="//ssl.gstatic.com/accounts/ui/avatar_2x.png"
-        class="profile-img-card"
-      />
+  <div class="form-placeholder text-center">
+    <div class="form-signin">
       <Form @submit="handleLogin" :validation-schema="schema">
-        <div class="form-group">
-          <label for="username">Username</label>
-          <Field name="username" type="text" class="form-control" />
+        <h1 class="h3 mb-3 fw-normal">Sign in</h1>
+
+        <div class="form-floating mb-3">
+          <Field type="username" name="username" class="form-control" id="floatingInput" placeholder="CoolName123" />
+          <label for="floatingInput">Username</label>
           <ErrorMessage name="username" class="error-feedback" />
         </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <Field name="password" type="password" class="form-control" />
+
+        <div class="form-floating mb-3">
+          <Field type="password" name="password" class="form-control" id="floatingPassword" placeholder="Password" />
+          <label for="floatingPassword">Password</label>
           <ErrorMessage name="password" class="error-feedback" />
         </div>
 
         <div class="form-group">
           <button class="btn btn-primary btn-block" :disabled="loading">
-            <span
-              v-show="loading"
-              class="spinner-border spinner-border-sm"
-            ></span>
+            <span v-show="loading" class="spinner-border spinner-border-sm"></span>
             <span>Login</span>
           </button>
         </div>
@@ -93,3 +88,42 @@ export default {
   },
 };
 </script>
+
+<style>
+html,
+body,
+#app,
+.form-placeholder {
+  height: 100%;
+}
+
+.form-placeholder {
+  display: flex;
+  align-items: center;
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+
+.form-signin {
+  width: 100%;
+  max-width: 330px;
+  padding: 15px;
+  margin: auto;
+}
+
+.form-signin .form-floating:focus-within {
+  z-index: 2;
+}
+
+.form-signin input[type="email"] {
+  margin-bottom: -1px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.form-signin input[type="password"] {
+  margin-bottom: 10px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+</style>

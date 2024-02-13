@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="navbar">
     <nav class="navbar navbar-expand navbar-dark bg-dark">
       <a href="/" class="navbar-brand">MyBlog</a>
       <div class="navbar-nav mr-auto">

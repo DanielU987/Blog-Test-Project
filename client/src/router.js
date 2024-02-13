@@ -3,7 +3,7 @@ import Home from "./views/Home.vue";
 
 import EditPost from "./components/EditPost.vue";
 
-import RegisterUser from "./components/Registration.vue";
+import RegisterUser from "./components/SignUp.vue";
 import LoginUser from "./components/Login.vue";
 
 const CreatePost = () => import("./components/CreatePost.vue");

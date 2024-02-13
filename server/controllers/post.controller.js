@@ -3,6 +3,7 @@ const db = require("../models");
 const { isNullOrUndefined } = require("util");
 const Post = db.post;
 const User = db.user;
+const UserPost = db.userPost;
 const Op = db.Sequelize.Op;
 
 // Create and Save a new Post
@@ -53,69 +54,100 @@ exports.create = (req, res) => {
 // Retrieve all Posts from the database.
 exports.findAll = (req, res) => {
   const title = req.query.title;
-  var condition = title ? { title: { [Op.iLike]: `%${title}%` } } : null;
+  const condition = title ? { title: { [Op.iLike]: `%${title}%` } } : null;
 
   Post.findAll({ where: condition })
-    .then((data) => {
-      res.send(data);
+    .then((posts) => {
+      // Запрос для извлечения связей между пользователями и постами
+      UserPost.findAll()
+        .then((userPosts) => {
+          // Извлечение всех пользователей для дальнейшего использования
+          User.findAll({ raw: true })
+            .then((users) => {
+              const postData = posts.map((post) => {
+                // Находим соответствующую запись о связи для текущего поста
+                const userPost = userPosts.find((up) => up.postId === post.id);
+                const postCreator = users.find((user) => user.id === userPost.userId);
+                // Извлекаем только имя пользователя из объекта postCreator
+                const creatorName = postCreator ? postCreator.username : "Anon";
+                return {
+                  id: post.id,
+                  title: post.title,
+                  content: post.content,
+                  image: post.image,
+                  createdAt: post.createdAt,
+                  updatedAt: post.updatedAt,
+                  creator: creatorName, // Поставляем только имя пользователя
+                };
+              });
+              res.send(postData);
+            })
+            .catch((err) => {
+              console.error("Ошибка при получении пользователей:", err);
+              res.status(500).send({
+                message: "Произошла ошибка при получении пользователей.",
+              });
+            });
+        })
+        .catch((err) => {
+          console.error("Ошибка при получении данных о связи пользователь-пост:", err);
+          res.status(500).send({
+            message: "Произошла ошибка при получении данных о связи пользователь-пост.",
+          });
+        });
     })
     .catch((err) => {
+      console.error("Ошибка при получении постов:", err);
       res.status(500).send({
-        message: err.message || "Some error occurred while retrieving posts.",
+        message: "Произошла ошибка при получении постов.",
       });
     });
 };
+
+
 
 // Find a single Post with an id
 exports.findOne = (req, res) => {
   const postId = req.params.id;
   const userId = req.query.userId;
-  
-  // Check if Post exists by postId
+
+  // Проверяем, существует ли пост с данным postId
   Post.findByPk(postId)
     .then((post) => {
-      if(!userId){
-        console.log("userId"+userId)
+      if (!userId) {
         const responseData = {
           post: post,
         };
         return res.send(responseData);
       }
-      
-      // Check if there's a corresponding row in user_post for the given userId and postId
-      db.sequelize
-        .query(
-          `
-        SELECT *
-        FROM user_post
-        WHERE "postId" = :postId AND "userId" = :userId
-        `,
-          {
-            replacements: { postId: postId, userId: userId },
-            type: Sequelize.QueryTypes.SELECT,
-          }
-        )
-        .then((results) => {
+
+      // Проверяем, существует ли соответствующая строка в user_post для данного userId и postId
+      UserPost.findOne({
+        where: {
+          postId: postId,
+          userId: userId
+        }
+      })
+        .then((userPost) => {
           const responseData = {
             post: post,
-            userPostFound: results.length > 0,
+            userPostFound: !!userPost // Если userPost найден, вернется true, иначе false
           };
           res.send(responseData);
         })
         .catch((err) => {
-          console.error("Error retrieving UserPost data:", err);
+          console.error("Ошибка при получении данных о связи пользователя и поста:", err);
           res.status(500).send({
-            message: "Error retrieving UserPost data.",
+            message: "Ошибка при получении данных о связи пользователя и поста."
           });
         });
     })
     .catch((err) => {
       res.status(500).send({
-        message: "Error retrieving Post with id=" + postId,
+        message: "Ошибка при получении поста с id=" + postId,
       });
     });
 };
-
 // Update a Post by the id in the request
 exports.update = (req, res) => {
   const id = req.params.id;

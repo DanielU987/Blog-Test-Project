@@ -1,26 +1,28 @@
 <template>
-  <div id="main">
-    <Header />
+  <Navbar />
+  <div class="container">
     <router-view></router-view>
   </div>
+  
 </template>
 
 <script>
-import Header from './views/Header.vue';
-
+import Header from "./views/Header.vue";
+import Navbar from "./views/Navbar.vue";
 export default {
   components: {
     Header,
+    Navbar
   },
 };
 </script>
 
 <style>
-#main {
+#app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
 }
+@import'~bootstrap/dist/css/bootstrap.css'
+
 </style>
