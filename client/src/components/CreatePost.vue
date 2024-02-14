@@ -1,37 +1,26 @@
 <template>
-  <div class="submit-form">
-    <div class="form-group">
-      <label for="title">Заголовок</label>
-      <input
-        type="text"
-        class="form-control"
-        id="title"
-        required
-        v-model="post.title"
-        name="title"
-      />
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-sm-12">
+        <div class="submit-form">
+          <div class="card shadow-sm">
+            <input type="file" id="image" @change="handleImageChange" accept="image/*" class="form-control" />
+            <img :src="getPostImage(post)" class="card-img-top" alt="Your image here" />
+            <div class="card-footer">
+              <div class="mb-3">
+                <label for="title" class="form-label">Заголовок:</label>
+                <input type="text" id="title" v-model="post.title" required class="form-control" />
+              </div>
+              <div class="mb-3">
+                <label for="content" class="form-label">Содержание:</label>
+                <textarea id="content" v-model="post.content" required class="form-control"></textarea>
+              </div>
+            </div>
+            <button class="btn btn-success" @click="savePost">Submit</button>
+          </div>
+        </div>
+      </div>
     </div>
-
-    <div class="form-group">
-      <label for="content">Содержание</label>
-      <input
-        class="form-control"
-        id="content"
-        required
-        v-model="post.content"
-        name="content"
-      />
-    </div>
-
-    <label for="image">Изображение:</label>
-    <input
-      type="file"
-      id="image"
-      accept="image/*"
-      @change="handleImageChange"
-    />
-
-    <button @click="savePost" class="btn btn-success">Submit</button>
   </div>
 </template>
 
@@ -55,6 +44,7 @@ export default {
       },
     };
   },
+
   methods: {
     savePost() {
       if (!this.loggedIn) {
@@ -90,6 +80,18 @@ export default {
           this.post.image = base64Data;
         };
         reader.readAsDataURL(file);
+      }
+    },
+    getPostImage(post) {
+      if (post.image) {
+        if (post.image && post.image.type === "Buffer") {
+          const bufferData = Buffer.from(post.image.data);
+          return `data:image/png;base64, ${bufferData}`;
+        } else {
+          return `data:image/png;base64, ${post.image}`;
+        }
+      } else {
+        return "//ssl.gstatic.com/accounts/ui/avatar_2x.png"
       }
     },
   },

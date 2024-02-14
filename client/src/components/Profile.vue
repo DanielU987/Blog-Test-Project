@@ -7,7 +7,7 @@
             <img src="//ssl.gstatic.com/accounts/ui/avatar_2x.png" alt="Default Profile Image"
               class="img-fluid img-thumbnail mt-4 mb-2" style="width: 150px; z-index: 1" />
 
-            <button type="button" class="btn btn-outline-red" data-mdb-ripple-color="dark" @click="deleteUserAndPosts"
+            <button type="button" class="btn btn-outline-danger" data-mdb-ripple-color="dark" @click="deleteUserAndPosts"
               style="z-index: 1">
               Delete profile
             </button>

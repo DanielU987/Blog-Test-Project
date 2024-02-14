@@ -64,8 +64,12 @@ export default {
         });
     },
     isCurrentUserPostOwner(post) {
-      // Проверяем, является ли текущий пользователь владельцем поста
-      return post.creator === this.$store.state.auth.user.username;
+      if(this.$store.state.auth.user){
+        return post.creator === this.$store.state.auth.user.username;
+      }else{
+        return false
+      }
+      
     },
     getPostImage(post) {
       if (post.image && post.image.type === 'Buffer') {
