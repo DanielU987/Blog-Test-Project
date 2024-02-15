@@ -15,6 +15,6 @@ module.exports = (sequelize, Sequelize) => {
     }
   });
 
-
+  //Удалить лайки и переделать
   return Post;
 };
