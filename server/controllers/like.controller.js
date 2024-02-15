@@ -1,24 +1,26 @@
 // controllers/postLike.js
 const db = require("../models");
-
+const User = db.user
+const Post = db.post
+const Like = db.like
 exports.likePost = (req, res) => {
   const userId = req.body.userId;
   const postId = req.body.postId;
 
   // Проверяем, существует ли пользователь и пост
-  db.User.findByPk(userId)
+ User.findByPk(userId)
     .then((user) => {
       if (!user) {
         return res.status(404).send({ message: "User Not found." });
       }
-      db.Post.findByPk(postId)
+     Post.findByPk(postId)
         .then((post) => {
           if (!post) {
             return res.status(404).send({ message: "Post Not found." });
           }
 
           // Проверяем, не поставил ли пользователь уже лайк
-          db.Like.findOne({
+          Like.findOne({
             where: {
               UserId: userId,
               PostId: postId,
@@ -38,7 +40,7 @@ exports.likePost = (req, res) => {
                   });
               } else {
                 // Создаем лайк
-                db.Like.create({
+                Like.create({
                   UserId: userId,
                   PostId: postId,
                 })
@@ -72,19 +74,19 @@ exports.unlikePost = (req, res) => {
   const postId = req.params.id;
 
   // Проверяем, существует ли пользователь и пост
-  db.User.findByPk(userId)
+ User.findByPk(userId)
     .then((user) => {
       if (!user) {
         return res.status(404).send({ message: "User Not found." });
       }
-      db.Post.findByPk(postId)
+     Post.findByPk(postId)
         .then((post) => {
           if (!post) {
             return res.status(404).send({ message: "Post Not found." });
           }
 
           // Проверяем, существует ли лайк
-          db.Like.findOne({
+          Like.findOne({
             where: {
               UserId: userId,
               PostId: postId,
@@ -120,5 +122,34 @@ exports.unlikePost = (req, res) => {
     .catch((error) => {
       console.error(error);
       res.status(500).json({ message: "Failed to find user" });
+    });
+};
+
+exports.countLikesForOne = (req, res) => {
+  const postId = req.params.id;
+
+  Like.count({
+    where: { postId: postId }
+  })
+    .then(count => {
+      res.json({ likeCount: count });
+    })
+    .catch(error => {
+      console.error(error);
+      res.status(500).json({ message: "Failed to get like count for post" });
+    });
+};
+
+exports.countAllLikes = (req, res) => {
+  Like.findAll({
+    attributes: ['postId', [db.Sequelize.fn('COUNT', 'postId'), 'totalLikes']],
+    group: ['postId']
+  })
+    .then(likeCounts => {
+      res.json(likeCounts);
+    })
+    .catch(error => {
+      console.error(error);
+      res.status(500).json({ message: "Failed to count total likes" });
     });
 };

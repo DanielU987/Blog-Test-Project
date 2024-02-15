@@ -18,21 +18,24 @@
             <div class="card-footer">
               <h2>{{ post.title }}</h2>
               <p>{{ post.content }}</p>
-              <button @click="toggleLike" class="btn" :class="{ 'btn-primary': !isLiked, 'btn-danger': isLiked }">
-                {{ isLiked ? 'Убрать лайк' : 'Лайк' }}
-              </button>
-              <form @submit.prevent="addComment">
-                <div class="mb-3">
-                  <label for="comment" class="form-label">Добавить комментарий</label>
-                  <textarea class="form-control" id="comment" rows="3" v-model="newComment"></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary">Отправить</button>
-              </form> 
-              
+              <div class="d-flex justify-content-between align-items-center">
+                <!-- Кнопка лайка -->
+                <button @click="toggleLike" class="btn" :class="{ 'btn-primary': !isLiked, 'btn-danger': isLiked }">
+                  <font-awesome-icon icon="fa-solid fa-heart" /> {{ likeCount }}
+                </button>
+                <!-- Форма добавления комментария -->
+                <form @submit.prevent="addComment" class="flex-grow-1">
+                  <div class="mb-3">
+                    <label for="comment" class="form-label">Добавить комментарий</label>
+                    <textarea class="form-control" id="comment" rows="3" v-model="newComment"></textarea>
+                  </div>
+                  <button type="submit" class="btn btn-primary">Отправить</button>
+                </form>
+              </div>
             </div>
             <button v-if="canEditPost" class="btn btn-warning" @click="redirectToEditPage">
-                Изменить пост
-              </button>
+              Изменить пост
+            </button>
           </div>
           <div v-else>
             <p>Пост не найден</p>
@@ -45,45 +48,49 @@
 
 <script>
 import PostService from "../services/post.service";
-import CommentService from "../services/comment.service"
-import LikeService from "../services/like.service"
+import CommentService from "../services/comment.service";
+import LikeService from "../services/like.service";
+
 export default {
   data() {
     return {
       post: null,
       canEditPost: false,
-      loading: true, // Переменная для отслеживания состояния загрузки данных
-      newComment: '',
-      isLiked: false, // Переменная для отслеживания состояния лайка
-      isAuthenticated: false, // Переменная для проверки аутентификации пользователя
+      loading: true,
+      newComment: "",
+      isLiked: false,
+      isAuthenticated: false,
+      likeCount: 0 // Добавим переменную для отображения общего количества лайков
     };
   },
   created() {
     const postId = this.$route.params.id;
-    this.isAuthenticated = !!this.$store.state.auth.user; // Проверка аутентификации пользователя
+    this.isAuthenticated = !!this.$store.state.auth.user;
     if (this.isAuthenticated) {
       const userId = this.$store.state.auth.user.id;
       this.getPost(postId, userId);
+       // Получим количество лайков для этого поста
     } else {
-      this.getPost(postId); // Если пользователь не аутентифицирован, получаем только пост без дополнительной информации
+      this.getPost(postId);
     }
+    this.getLikeCountForPost(postId);
   },
   methods: {
     getPost(postId, userId = null) {
       PostService.get(postId, userId)
         .then((response) => {
-          this.post = response.data.post;
+          this.post = response.data;
           if (this.isAuthenticated) {
             this.post.creator = this.$store.state.auth.user.username;
             this.canEditPost = response.data.userPostFound;
-            this.isLiked = response.data.userPostFound; // Инициализация состояния лайка
+            this.isLiked = response.data.userPostFound;
           }
-          this.loading = false; // Установить loading в false, когда данные загружены
+          this.loading = false;
           console.log(response.data);
         })
         .catch((e) => {
           console.log(e);
-          this.loading = false; // Установить loading в false в случае ошибки
+          this.loading = false;
         });
     },
     getPostImage(post) {
@@ -99,60 +106,63 @@ export default {
     },
     addComment() {
       if (!this.isAuthenticated) {
-        // Проверка аутентификации пользователя перед добавлением комментария
         console.log("Пользователь не аутентифицирован");
         return;
       }
       const postId = this.post.id;
       const userId = this.$store.state.auth.user.id;
-      
       CommentService.create(postId, userId, this.newComment)
-        .then(response => {
-          // Обновите список комментариев или как-то еще обработайте успешное добавление комментария
+        .then((response) => {
           console.log(response.data);
-          // Сбросить поле ввода после добавления комментария
-          this.newComment = '';
+          this.newComment = "";
         })
-        .catch(error => {
+        .catch((error) => {
           console.error(error);
-          // Обработка ошибки при добавлении комментария
         });
     },
     toggleLike() {
       if (!this.isAuthenticated) {
-        // Проверка аутентификации пользователя перед выполнением действий с лайком
         console.log("Пользователь не аутентифицирован");
         return;
       }
       const postId = this.post.id;
       const userId = this.$store.state.auth.user.id;
-      
+
       if (this.isLiked) {
-        // Если пост уже лайкнут, то снимаем лайк
         LikeService.unlike(postId, userId)
-          .then(response => {
-            // Обновите состояние лайка или как-то еще обработайте успешное удаление лайка
+          .then((response) => {
             console.log(response.data);
-            this.isLiked = false; // Установить состояние лайка как false после успешного удаления лайка
+            this.isLiked = false;
+            this.getLikeCountForPost(postId); // Обновим количество лайков после отмены лайка
           })
-          .catch(error => {
+          .catch((error) => {
             console.error(error);
-            // Обработка ошибки при удалении лайка
           });
       } else {
-        // Если пост еще не лайкнут, то лайкаем
         LikeService.like(postId, userId)
-          .then(response => {
-            // Обновите состояние лайка или как-то еще обработайте успешное добавление лайка
+          .then((response) => {
             console.log(response.data);
-            this.isLiked = true; // Установить состояние лайка как true после успешного лайка
+            this.isLiked = true;
+            this.getLikeCountForPost(postId); // Обновим количество лайков после постановки лайка
           })
-          .catch(error => {
+          .catch((error) => {
             console.error(error);
-            // Обработка ошибки при добавлении лайка
           });
       }
+    },
+    getLikeCountForPost(postId) {
+      LikeService.countOne(postId)
+        .then((response) => {
+          this.likeCount = response.data.likeCount;
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     }
   },
 };
 </script>
+
+<style>
+/* Ваши стили */
+</style>

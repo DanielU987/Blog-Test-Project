@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-  const Post = sequelize.define("post", {
+  const Post = sequelize.define("posts", {
     title: {
       type: Sequelize.STRING,
     },
@@ -9,7 +9,12 @@ module.exports = (sequelize, Sequelize) => {
     image: {
       type: Sequelize.BLOB,
     },
+    likesCount: {
+      type: Sequelize.INTEGER,
+      defaultValue: 0
+    }
   });
+
 
   return Post;
 };

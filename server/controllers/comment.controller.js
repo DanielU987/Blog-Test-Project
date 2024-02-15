@@ -1,76 +1,57 @@
-// controllers/comment.controller.js
 const db = require("../models");
+const Comment = db.comment;
+
 
 exports.createComment = (req, res) => {
-  const userId = req.body.userId;
-  const postId = req.body.postId;
-  const content = req.body.content;
+  const { userId, postId, content } = req.body;
 
-  // Проверяем, существует ли пользователь и пост
-  db.User.findByPk(userId)
-    .then((user) => {
-      if (!user) {
-        return res.status(404).send({ message: "User Not found." });
-      }
-      db.Post.findByPk(postId)
-        .then((post) => {
-          if (!post) {
-            return res.status(404).send({ message: "Post Not found." });
-          }
-
-          // Создаем комментарий
-          db.Comment.create({
-            UserId: userId,
-            PostId: postId,
-            content: content,
-          })
-            .then((comment) => {
-              res.json(comment);
-            })
-            .catch((error) => {
-              console.error(error);
-              res.status(500).json({ message: "Failed to create comment" });
-            });
-        })
-        .catch((error) => {
-          console.error(error);
-          res.status(500).json({ message: "Failed to find post" });
-        });
+  Comment.create({
+    userId,
+    postId,
+    content,
+  })
+    .then((comment) => {
+      res.status(201).send(comment);
     })
-    .catch((error) => {
-      console.error(error);
-      res.status(500).json({ message: "Failed to find user" });
+    .catch((err) => {
+      console.error("Error creating comment:", err);
+      res.status(500).send({
+        message: "An error occurred while creating the comment.",
+      });
     });
 };
 
 exports.getAllComments = (req, res) => {
   const postId = req.params.postId;
 
-  // Находим все комментарии для данного поста
-  db.Comment.findAll({
-    where: {
-      PostId: postId,
-    },
+  Comment.findAll({
+    where: { postId },
+    include: [db.User], // Include user details for each comment
   })
     .then((comments) => {
-      res.json(comments);
+      res.status(200).send(comments);
     })
-    .catch((error) => {
-      console.error(error);
-      res.status(500).json({ message: "Failed to get comments" });
+    .catch((err) => {
+      console.error("Error fetching comments:", err);
+      res.status(500).send({
+        message: "An error occurred while fetching the comments.",
+      });
     });
 };
 
 exports.deleteComment = (req, res) => {
-  const commentId = req.params.id;
+  const id = req.params.id;
 
-  // Удаляем комментарий по его идентификатору
-  db.Comment.destroy({ where: { id: commentId } })
+  Comment.destroy({
+    where: { id },
+  })
     .then(() => {
-      res.json({ message: "Comment deleted successfully" });
+      res.status(204).send(); // No content to send after deletion
     })
-    .catch((error) => {
-      console.error(error);
-      res.status(500).json({ message: "Failed to delete comment" });
+    .catch((err) => {
+      console.error("Error deleting comment:", err);
+      res.status(500).send({
+        message: "An error occurred while deleting the comment.",
+      });
     });
 };

@@ -26,6 +26,8 @@ app.use(cors(corsOptions));
 require("./routes/auth.routes")(app);
 require("./routes/user.routes")(app);
 require("./routes/post.routes")(app);
+require("./routes/like.routes")(app);
+require("./routes/comment.routes")(app);
 
 const port = 3000;
 app.listen(port, () => {

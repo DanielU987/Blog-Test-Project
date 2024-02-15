@@ -1,10 +1,11 @@
 module.exports = (app) => {
-    var router = require("express").Router();
-  const CommentController = require("../controllers/comment");
+  var router = require("express").Router();
+  const Comment = require("../controllers/comment.controller");
 
-  router.post("/", CommentController.createComment);
-  router.get('/:postId', CommentController.getAllComments);
-  router.delete("/:id", CommentController.deleteComment);
+  router.post("/", Comment.createComment);
+  router.get("/:postId", Comment.getAllComments);
+  router.delete("/:id", Comment.deleteComment);
 
-  app.use("/api/comment");
+  app.use("/api/comment", router);
+
 };

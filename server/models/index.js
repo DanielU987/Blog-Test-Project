@@ -1,5 +1,4 @@
 const config = require("../config/db.config.js");
-
 const Sequelize = require("sequelize");
 const sequelize = new Sequelize(
   config.DB,
@@ -15,7 +14,6 @@ const sequelize = new Sequelize(
       idle: config.pool.idle
     },
   }
-  
 );
 
 const db = {};
@@ -41,6 +39,19 @@ db.user.belongsToMany(db.post, {
   through: "user_post"
 });
 
+db.user.hasMany(db.like);
+db.like.belongsTo(db.user);
+
+db.post.hasMany(db.like);
+db.like.belongsTo(db.post);
+
+db.userPost.belongsTo(db.user);
+db.userPost.belongsTo(db.post);
+
+db.post.hasMany(db.comment);
+db.comment.belongsTo(db.post);
+db.user.hasMany(db.comment);
+db.comment.belongsTo(db.user);
 
 db.ROLES = ["user", "admin", "moderator"];
 

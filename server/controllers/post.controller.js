@@ -1,6 +1,5 @@
 const { Sequelize } = require("sequelize");
 const db = require("../models");
-const { isNullOrUndefined } = require("util");
 const Post = db.post;
 const User = db.user;
 const UserPost = db.userPost;
@@ -15,7 +14,6 @@ exports.create = (req, res) => {
     });
     return;
   }
-  console.log("!AAAA");
   const userId = req.body.userId;
 
   User.findByPk(userId)
@@ -90,9 +88,13 @@ exports.findAll = (req, res) => {
             });
         })
         .catch((err) => {
-          console.error("Ошибка при получении данных о связи пользователь-пост:", err);
+          console.error(
+            "Ошибка при получении данных о связи пользователь-пост:",
+            err
+          );
           res.status(500).send({
-            message: "Произошла ошибка при получении данных о связи пользователь-пост.",
+            message:
+              "Произошла ошибка при получении данных о связи пользователь-пост.",
           });
         });
     })
@@ -104,48 +106,58 @@ exports.findAll = (req, res) => {
     });
 };
 
-
-
 // Find a single Post with an id
+
 exports.findOne = (req, res) => {
   const postId = req.params.id;
-  const userId = req.query.userId;
-
-  // Проверяем, существует ли пост с данным postId
   Post.findByPk(postId)
     .then((post) => {
-      if (!userId) {
-        const responseData = {
-          post: post,
-        };
-        return res.send(responseData);
+      if (!post) {
+        return res.status(404).send({ message: "Пост не найден" });
       }
 
-      // Проверяем, существует ли соответствующая строка в user_post для данного userId и postId
-      UserPost.findOne({
-        where: {
-          postId: postId,
-          userId: userId
-        }
-      })
+      // Запрос для извлечения связи между пользователем и постом
+      UserPost.findOne({ where: { postId: postId } })
         .then((userPost) => {
-          const responseData = {
-            post: post,
-            userPostFound: !!userPost // Если userPost найден, вернется true, иначе false
-          };
-          res.send(responseData);
+          if (!userPost) {
+            return res.status(404).send({ message: "Связь пользователя с постом не найдена" });
+          }
+
+          // Извлечение информации о пользователе
+          User.findByPk(userPost.userId)
+            .then((user) => {
+              if (!user) {
+                return res.status(404).send({ message: "Пользователь не найден" });
+              }
+
+              const creatorName = user.username || "Anon";
+
+              // Формирование данных о посте для отправки
+              const postData = {
+                id: post.id,
+                title: post.title,
+                content: post.content,
+                image: post.image,
+                createdAt: post.createdAt,
+                updatedAt: post.updatedAt,
+                creator: creatorName,
+              };
+
+              res.send(postData);
+            })
+            .catch((err) => {
+              console.error("Ошибка при получении пользователя:", err);
+              res.status(500).send({ message: "Произошла ошибка при получении пользователя." });
+            });
         })
         .catch((err) => {
-          console.error("Ошибка при получении данных о связи пользователя и поста:", err);
-          res.status(500).send({
-            message: "Ошибка при получении данных о связи пользователя и поста."
-          });
+          console.error("Ошибка при получении данных о связи пользователь-пост:", err);
+          res.status(500).send({ message: "Произошла ошибка при получении данных о связи пользователь-пост." });
         });
     })
     .catch((err) => {
-      res.status(500).send({
-        message: "Ошибка при получении поста с id=" + postId,
-      });
+      console.error("Ошибка при получении поста:", err);
+      res.status(500).send({ message: "Произошла ошибка при получении поста." });
     });
 };
 // Update a Post by the id in the request
