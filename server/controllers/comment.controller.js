@@ -1,14 +1,15 @@
 const db = require("../models");
 const Comment = db.comment;
-
+const Post = db.post;
+const User = db.User;
 
 exports.createComment = (req, res) => {
   const { userId, postId, content } = req.body;
 
   Comment.create({
-    userId,
-    postId,
-    content,
+    content: content,
+    UserId: userId, // Связываем комментарий с пользователем
+    PostId: postId, // Связываем комментарий с постом
   })
     .then((comment) => {
       res.status(201).send(comment);
@@ -20,21 +21,39 @@ exports.createComment = (req, res) => {
       });
     });
 };
+exports.findAllCommentsForPosts = (req, res) => {
+  Post.findAll({ include: Comment })
+    .then((posts) => {
+      res.status(200).send(posts);
+    })
+    .catch((err) => {
+      console.error("Error finding comments for posts:", err);
+      res.status(500).send({
+        message: "An error occurred while finding comments for posts.",
+      });
+    });
+};
 
-exports.getAllComments = (req, res) => {
-  const postId = req.params.postId;
-
-  Comment.findAll({
-    where: { postId },
-    include: [db.User], // Include user details for each comment
+exports.findAllCommentsForPost = (req, res) => {
+  const postId = req.params.id;
+  console.log(req.params);
+  Comment.findAll({ 
+    where: { PostId: postId },
+    include: User
   })
     .then((comments) => {
+      console.log(comments)
+      if (!comments) {
+        return res
+          .status(404)
+          .send({ message: "Comments not found for the post" });
+      }
       res.status(200).send(comments);
     })
     .catch((err) => {
-      console.error("Error fetching comments:", err);
+      console.error("Error finding comments for post:", err);
       res.status(500).send({
-        message: "An error occurred while fetching the comments.",
+        message: "An error occurred while finding comments for the post.",
       });
     });
 };

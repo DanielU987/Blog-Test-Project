@@ -1,15 +1,15 @@
 import http from "../http-common";
 
 class CommentService {
-  create(postId, userId, content) {
-    return http.post("/comments", {
-      postId,
-      userId,
-      content
-    });
+  create(data) {
+    return http.post("/comments", data);
   }
 
-  getAll(postId) {
+  getAll() {
+    return http.get(`/comments/`);
+  }
+
+  getCommentsByPostId(postId) {
     return http.get(`/comments/${postId}`);
   }
 

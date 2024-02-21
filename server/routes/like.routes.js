@@ -1,11 +1,18 @@
-module.exports = app =>{
-    var router = require("express").Router();
-    const Likes = require('../controllers/like.controller');
+module.exports = (app) => {
+  const like = require("../controllers/like.controller");
 
-    router.post('/', Likes.likePost);
-    router.delete('/:id', Likes.unlikePost);
-    router.get('/count-all', Likes.countAllLikes); // Добавлен новый маршрут для подсчета общего количества лайков
-    router.get('/count-one/:id', Likes.countLikesForOne); // Добавлен новый маршрут для подсчета количества лайков для определенного поста
+  var router = require("express").Router();
 
-    app.use("/api/like", router)
-}
+  router.post("/:id", like.likePost);
+
+  router.delete("/:id", like.unlikePost);
+
+  router.get("/check/:id", like.checkIfLiked);
+
+  router.get("/", like.countAllLikesForAllPosts);
+
+  router.get("/:id", like.countAllLikesForOnePost);
+
+  
+  app.use("/api/likes", router);
+};

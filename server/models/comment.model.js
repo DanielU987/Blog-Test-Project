@@ -1,25 +1,14 @@
 module.exports = (sequelize, Sequelize) => {
-    const Comment = sequelize.define("comment", {
+    const Comment = sequelize.define("Comment", {
       id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
         autoIncrement: true
       },
-      text: {
+      content: {
         type: Sequelize.TEXT,
         allowNull: false
       },
-      // Идентификатор пользователя, который оставил комментарий
-      userId: {
-        type: Sequelize.INTEGER,
-        allowNull: false
-      },
-      // Идентификатор поста, к которому относится комментарий
-      postId: {
-        type: Sequelize.INTEGER,
-        allowNull: false
-      }
-      // Другие поля комментария, если необходимо
     });
   
     return Comment;

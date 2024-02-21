@@ -3,9 +3,12 @@ module.exports = (app) => {
   const Comment = require("../controllers/comment.controller");
 
   router.post("/", Comment.createComment);
-  router.get("/:postId", Comment.getAllComments);
+  router.get("/", Comment.findAllCommentsForPosts);
+  
+  router.get("/:id", Comment.findAllCommentsForPost);
+
   router.delete("/:id", Comment.deleteComment);
 
-  app.use("/api/comment", router);
+  app.use("/api/comments", router);
 
 };

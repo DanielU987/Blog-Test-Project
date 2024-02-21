@@ -1,12 +1,10 @@
 module.exports = (sequelize, Sequelize) => {
-  const UserPost = sequelize.define("UserPosts",
-  {
+  const Like = sequelize.define("Like", {
     id: {
       type: Sequelize.INTEGER,
       primaryKey: true,
       autoIncrement: true,
     },
   });
-
-  return UserPost;
+  return Like;
 };

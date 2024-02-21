@@ -57,7 +57,6 @@ export default {
         title: this.post.title,
         content: this.post.content,
         image: this.post.image,
-
         userId: this.user.id,
       };
 

@@ -5,8 +5,8 @@ class PostService {
     return http.get("/posts");
   }
 
-  get(id, userId) {
-    return http.get(`/posts/${id}`, { params: { userId:userId } });
+  get(id) {
+    return http.get(`/posts/${id}`);
   }
 
   create(data) {
