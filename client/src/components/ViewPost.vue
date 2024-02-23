@@ -2,14 +2,16 @@
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-md-8">
+        <!-- Выводим индикатор загрузки, если данные загружаются -->
         <div v-if="loading" class="text-center">
-          <!-- Показать индикатор загрузки, пока данные загружаются -->
           <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Loading...</span>
           </div>
         </div>
+        <!-- Если данные загружены, выводим содержимое -->
         <div v-else>
           <div v-if="post" class="card shadow-sm">
+            <!-- Выводим информацию о посте -->
             <div class="card-header">
               <font-awesome-icon icon="circle-user" />
               {{ post.creator }}
@@ -19,18 +21,21 @@
               <h2>{{ post.title }}</h2>
               <p>{{ post.content }}</p>
               <div class="d-flex justify-content-between align-items-center">
+                <!-- Форма для добавления комментария -->
                 <form @submit.prevent="addComment" class="flex-grow-1">
                   <div class="input-with-comment">
                     <textarea class="form-control" id="comment" rows="3" v-model="newComment"></textarea>
                     <button type="submit" class="btn btn-primary comment-btn">Отправить</button>
                   </div>
-                  <div class="d-flex align-items-center"> <!-- Изменение здесь -->
-                    <button @click="toggleLike" class="btn" :class="{ 'btn-primary': !isLiked, 'btn-danger': isLiked }">
-                      <font-awesome-icon icon="fa-solid fa-heart" /> {{ post.likes }}
-                    </button>
-                  </div>
                 </form>
+                <!-- Кнопка для лайка поста -->
+                <div class="d-flex align-items-center">
+                  <button @click="toggleLike(post.id)" class="btn" :class="{ 'btn-primary': !isLiked, 'btn-danger': isLiked }">
+                    <font-awesome-icon icon="fa-solid fa-heart" /> {{ post.likes }}
+                  </button>
+                </div>
               </div>
+              <!-- Выводим комментарии -->
               <ul class="list-group">
                 <li v-for="comment in post.comments" :key="comment.id" class="list-group-item">
                   <div>{{ comment.content }}</div>
@@ -38,6 +43,7 @@
                 </li>
               </ul>
             </div>
+            <!-- Кнопка для редактирования поста -->
             <button v-if="canEditPost" class="btn btn-warning" @click="redirectToEditPage">
               Изменить пост
             </button>
@@ -52,54 +58,49 @@
 </template>
 
 <script>
-import PostService from "../services/post.service";
-import CommentService from "../services/comment.service";
-import LikeService from "../services/like.service";
+import { mapGetters, mapActions } from 'vuex';
+import CommentService from '../services/comment.service';
 
 export default {
   data() {
     return {
-      post: null,
       loading: true,
       newComment: "",
-      isLiked: false,
-      isAuthenticated: false,
-      isCreator: false,
-      postId: null,
-      userId: null,
-
     };
   },
-  mounted() {
-
+  computed: {
+    ...mapGetters('post', ['getPostById']),
+    post() {
+      return this.getPostById(this.$route.params.id);
+    },
+    isAuthenticated() {
+      return !!this.$store.state.auth.user;
+    },
+    userId() {
+      return this.$store.state.auth.user.id;
+    },
+    isLiked() {
+      const post = this.post;
+      return post ? post.isLiked : false;
+    },
+    canEditPost() {
+      const currentUser = this.$store.state.auth.user;
+      return currentUser && this.post && this.post.creator === currentUser.username;
+    },
   },
   created() {
-    this.postId = this.$route.params.id;
-    this.userId = this.$store.state.auth.user.id;
-    this.isAuthenticated = !!this.$store.state.auth.user;
-
     this.getPost().then(() => {
-      
-      this.getLikes()
-      this.checkIfLiked()
-      this.canEditPost()
-      this.getComments()
+      this.loading = false;
+      this.getComments(); // Загрузка комментариев при загрузке поста
     }).catch(error => {
       console.error('Error loading post:', error);
     });
-
   },
   methods: {
+    ...mapActions('post', ['loadPosts', 'likePost', 'unlikePost']),
+    ...mapActions('comment', ['createComment', 'loadCommentsForPost', 'loadAllComments']),
     getPost() {
-      return PostService.get(this.postId, this.userId)
-        .then((response) => {
-          this.post = response.data;
-          this.loading = false;
-        })
-        .catch((e) => {
-          console.log(e);
-          this.loading = false;
-        });
+      return this.loadPosts();
     },
     getPostImage(post) {
       if (post.image && post.image.type === "Buffer") {
@@ -117,74 +118,45 @@ export default {
         console.log("Пользователь не аутентифицирован");
         return;
       }
-      var data = {
-        postId: this.postId,
+      const data = {
+        postId: this.post.id, // Используйте this.post.id вместо this.postId
         userId: this.userId,
         content: this.newComment
       };
-      CommentService.create(data)
-        .then((response) => {
-          console.log(response.data);
-          this.newComment = "";
+      this.createComment(data) // Используйте действие из модуля комментариев
+        .then(() => {
+          console.log('Comment added successfully');
+          this.newComment = ""; // Сбросить поле ввода после добавления комментария
         })
         .catch((error) => {
           console.error(error);
         });
     },
     getComments() {
-      CommentService.getCommentsByPostId(this.postId)
-        .then(response => {
-          this.post.comments = response.data;
-          console.log(response.data)
+      // Загрузка комментариев для текущего поста
+      console.log(this.post.id)
+      this.loadAllComments()
+        .then((comments) => {
+          console.log('Comments:', comments);
+          console.log('Comments loaded successfully');
         })
         .catch(error => {
-          console.error('Error fetching comments:', error);
+          console.error('Error loading comments:', error);
         });
     },
-    toggleLike() {
-      console.log(this.userId)
-      if (this.isLiked) {
-        LikeService.unlikePost(this.postId, this.userId)
-          .then(() => {
-            this.isLiked = false;
-            this.post.likes--;
-          })
-          .catch(error => {
-            console.error(error);
-          });
-      } else {
-        LikeService.likePost(this.postId, this.userId)
-          .then(() => {
-            this.isLiked = true;
-            this.post.likes++;
-          })
-          .catch(error => {
-            console.error(error);
-          });
-      }
-    },
-    canEditPost() {
-      return this.isAuthenticated && this.isCreator;
-    },
-    checkIfLiked() {
-      return LikeService.checkIfLiked(this.postId, this.userId)
-        .then((res) => {
-          this.isLiked = res.data;
-        })
-        .catch((error) => {
-          console.error("Error occurred while checking if liked:", error);
-          throw error; // Проброс ошибки, чтобы ее можно было обработать в коде, который вызывает эту функцию
-        });
-    },
-    getLikes() {
-      LikeService.countAllLikesForOnePost(this.postId) // Вызываем функцию из сервиса для получения количества лайков для конкретного поста
-        .then(likesCount => {
-          this.post.likes = likesCount.data["count"];
+    toggleLike(postId) {
+      const post = this.getPostById(postId);
+      if (!post) return;
+
+      const likeAction = post.isLiked ? 'unlikePost' : 'likePost';
+      this.$store.dispatch(`post/${likeAction}`, postId)
+        .then(() => {
+          console.log('Like toggled successfully');
         })
         .catch(error => {
-          console.error("Error occurred while retrieving likes count for the post:", error);
+          console.error("Error occurred while toggling like:", error);
         });
-    }
+    },
   },
 };
 </script>
@@ -192,8 +164,6 @@ export default {
 <style>
 .input-with-comment {
   position: relative;
-
-
 }
 
 .textarea {

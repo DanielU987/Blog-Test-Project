@@ -1,11 +1,11 @@
 import http from "../http-common";
 
 class CommentService {
-  create(data) {
+  createComment(data) {
     return http.post("/comments", data);
   }
 
-  getAll() {
+  getAllComments() {
     return http.get(`/comments/`);
   }
 

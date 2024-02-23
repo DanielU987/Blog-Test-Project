@@ -7,7 +7,7 @@ module.exports = (app) => {
 
   router.delete("/:id", like.unlikePost);
 
-  router.get("/check/:id", like.checkIfLiked);
+  router.get("/check", like.checkIfLiked);
 
   router.get("/", like.countAllLikesForAllPosts);
 

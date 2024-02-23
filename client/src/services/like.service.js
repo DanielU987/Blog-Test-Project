@@ -17,8 +17,8 @@ class LikeService {
     return http.get(`/likes/${postId}`);
   }
 
-  checkIfLiked(postId, userId) {
-    return http.get(`/likes/check/${postId}`, { params: { userId: userId } });
+  checkIfLiked(userId) {
+    return http.get(`/likes/check`, { params: { userId: userId } });
   }
 }
 

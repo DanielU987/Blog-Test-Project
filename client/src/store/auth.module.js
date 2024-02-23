@@ -7,7 +7,10 @@ const initialState = user
 
 export const auth = {
   namespaced: true,
-  state: initialState,
+  state: {
+    ...initialState,
+    userId: user ? user.id : null
+  },
   actions: {
     login({ commit }, user) {
       return AuthService.login(user).then(
@@ -36,7 +39,16 @@ export const auth = {
           return Promise.reject(error);
         }
       );
-    }
+    },
+    getUserId({ state }) {
+      return new Promise((resolve, reject) => {
+        if (state.user) {
+          resolve(state.user.id);
+        } else {
+          reject("User not logged in");
+        }
+      });
+    },
   },
   mutations: {
     loginSuccess(state, user) {

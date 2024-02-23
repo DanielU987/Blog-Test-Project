@@ -9,12 +9,11 @@
           </div>
         </div>
         <!-- Показывать посты, когда данные загрузились -->
-        <div v-else v-for="post in posts" :key="post.id" class="col">
+        <div v-else-if="posts" v-for="post in posts" :key="post.id" class="col">
           <div class="card shadow-sm">
             <div class="card-header">
               <font-awesome-icon icon="circle-user" />
               {{ post.creator }}
-
             </div>
             <div class="image-container">
               <img class="bd-placeholder-img card-img-top" :src="getPostImage(post)" alt="Post Image" />
@@ -32,12 +31,16 @@
                 </div>
                 <!-- Добавляем кнопку для лайков -->
                 <button @click="toggleLike(post.id)" class="btn btn-sm"
-                  :class="{ 'btn-primary': !isLiked(post.id), 'btn-danger': isLiked(post.id) }">
+                  :class="{ 'btn-primary': !post.isLiked, 'btn-danger': post.isLiked }">
                   <font-awesome-icon icon="fa-solid fa-heart" /> {{ post.likes }}
                 </button>
               </div>
             </div>
           </div>
+        </div>
+        <!-- Показать сообщение, если постов нет -->
+        <div v-else class="col text-center">
+          <p>No posts available.</p>
         </div>
       </div>
     </div>
@@ -45,58 +48,37 @@
 </template>
 
 <script>
-import PostService from "../services/post.service";
-import LikeService from "../services/like.service"; // Импортируем сервис для работы с лайками
+import { mapGetters, mapActions } from 'vuex';
 
 export default {
   data() {
     return {
-      posts: [],
       loading: true,
     };
-
   },
-  mounted() {
-    this.retrievePosts();
+  computed: {
+    ...mapGetters('post', ['allPosts', 'getPostById']),
+    posts() {
+      return this.allPosts;
+    }
   },
   created() {
-    this.postId = this.$route.params.id;
-    this.userId = this.$store.state.auth.user.id;
+    this.retrievePosts();
   },
   methods: {
+    ...mapActions('post', ['loadPosts', 'likePost', 'unlikePost', 'checkIfLiked']),
     retrievePosts() {
-      PostService.getAll()
-        .then(response => {
-          this.posts = response.data;
+      this.$store.dispatch('post/loadPosts')
+        .then(() => {
           this.loading = false;
-          // Вызываем функцию для получения количества лайков для каждого поста
-          this.countAllLikes();
-        })
-        .catch(e => {
-          console.log(e);
-          this.loading = false;
-        });
-    },
-    countAllLikes() {
-      LikeService.countAllLikes() // Вызываем функцию из сервиса для получения количества лайков для каждого поста
-        .then(likesMap => {
-          console.log(likesMap)
-          this.posts.forEach(post => {
-            const postId = parseInt(post.id); // Преобразуем строку в число
-            post.likes = likesMap.data[postId] || 0;
-            console.log(likesMap.data[postId])
-          });
         })
         .catch(error => {
-          console.error("Error occurred while retrieving likes count for posts:", error);
+          console.error("Error occurred while loading posts:", error);
         });
     },
     isCurrentUserPostOwner(post) {
-      if (this.$store.state.auth.user) {
-        return post.creator === this.$store.state.auth.user.username;
-      } else {
-        return false;
-      }
+      const currentUser = this.$store.state.auth.user;
+      return currentUser && post.creator === currentUser.username;
     },
     getPostImage(post) {
       if (post.image && post.image.type === 'Buffer') {
@@ -105,40 +87,23 @@ export default {
       }
       return '';
     },
-    // Функция для определения, лайкнул ли текущий пользователь пост или нет
-    isLiked(postId) {
-      return LikeService.checkIfLiked(postId, this.userId)
-        .then((res) => {
-          return res.data;
-        })
-        .catch((error) => {
-          console.error("Error occurred while checking if liked:", error);
-          throw error; // Проброс ошибки, чтобы ее можно было обработать в коде, который вызывает эту функцию
-        });
-    },
-    // Функция для добавления или удаления лайка для поста
-    toggleLike(postId) {
-      let postToUpdate = this.posts.find(post => post.id === postId);
-      console.log(postToUpdate)
-      if (!postToUpdate) return; // Пост не найден, выходим из функции
 
-      this.isLiked(postId)
-        .then((liked) => {
-          if (liked) {
-            return LikeService.unlikePost(postId, this.userId);
-          } else {
-            return LikeService.likePost(postId, this.userId);
-          }
-        })
+    toggleLike(postId) {
+      const post = this.getPostById(postId);
+      if (!post) return;
+
+      const likeAction = post.isLiked ? 'unlikePost' : 'likePost';
+      this.$store.dispatch(`post/${likeAction}`, postId)
         .then(() => {
-          postToUpdate.likes += postToUpdate.isLiked ? -1 : 1;
-          postToUpdate.isLiked = !postToUpdate.isLiked;
+          console.log('Like toggled successfully');
         })
         .catch(error => {
-          console.error(error);
+          console.error("Error occurred while toggling like:", error);
         });
     },
+
   },
+
 };
 </script>
 

@@ -48,19 +48,21 @@ exports.unlikePost = (req, res) => {
 };
 
 exports.checkIfLiked = (req, res) => {
-  const PostId = req.params.id;
-  
   const UserId = req.query.userId;
 
-  Like.findOne({ where: { PostId: PostId, UserId: UserId } })
-  .then((like) => {
-     res.send(!!like) // Возвращаем true, если найден лайк, иначе false
-  })
-  .catch((err) => {
-    console.error(err);
-    res.status(500).json({ message: "Error checking if post liked by user" });
-  });
-}
+  Like.findAll({ where: { UserId: UserId } })
+    .then((likes) => {
+      const isLikedMap = {};
+      likes.forEach((like) => {
+        isLikedMap[like.PostId] = true;
+      });
+      res.send(isLikedMap);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).json({ message: "Error checking if post liked by user" });
+    });
+};
 
 exports.countAllLikesForAllPosts = (req, res) => {
   Like.findAll({

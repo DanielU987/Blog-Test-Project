@@ -21,6 +21,7 @@ exports.createComment = (req, res) => {
       });
     });
 };
+
 exports.findAllCommentsForPosts = (req, res) => {
   Post.findAll({ include: Comment })
     .then((posts) => {
@@ -48,6 +49,7 @@ exports.findAllCommentsForPost = (req, res) => {
           .status(404)
           .send({ message: "Comments not found for the post" });
       }
+      console.log(comments)
       res.status(200).send(comments);
     })
     .catch((err) => {
