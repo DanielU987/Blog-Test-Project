@@ -1,7 +1,8 @@
 const db = require("../models");
 const Comment = db.comment;
 const Post = db.post;
-const User = db.User;
+const User = db.user;
+const Like = db.like;
 
 exports.createComment = (req, res) => {
   const { userId, postId, content } = req.body;
@@ -23,7 +24,9 @@ exports.createComment = (req, res) => {
 };
 
 exports.findAllCommentsForPosts = (req, res) => {
-  Post.findAll({ include: Comment })
+  User.findAll({ include: [
+    { model: Like },
+  ] })
     .then((posts) => {
       res.status(200).send(posts);
     })
@@ -38,18 +41,18 @@ exports.findAllCommentsForPosts = (req, res) => {
 exports.findAllCommentsForPost = (req, res) => {
   const postId = req.params.id;
   console.log(req.params);
-  Comment.findAll({ 
+  Comment.findAll({
     where: { PostId: postId },
-    include: User
+    include: User,
   })
     .then((comments) => {
-      console.log(comments)
+      console.log(comments);
       if (!comments) {
         return res
           .status(404)
           .send({ message: "Comments not found for the post" });
       }
-      console.log(comments)
+      console.log(comments);
       res.status(200).send(comments);
     })
     .catch((err) => {

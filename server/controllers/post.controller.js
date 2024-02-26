@@ -2,6 +2,7 @@ const { Sequelize } = require("sequelize");
 const db = require("../models");
 const Post = db.post;
 const User = db.user;
+const Comment = db.comment;
 const UserPost = db.userPost;
 const Like = db.like;
 const Op = db.Sequelize.Op;
@@ -43,7 +44,29 @@ exports.create = (req, res) => {
     });
 };
 
+exports.findAll = (req, res) => {
+  Post.findAll({
+    include: [
+      {
+        model: User,
+        attributes: ["id", "username"],
+        include: Like,
+      },
+      { model: Like },
+      { model: Comment },
+    ],
+  })
+    .then((data) => {
+      res.send(data);
+    })
+    .catch((error) => {
+      console.error("Error finding data:", error);
+      res.status(500).send("Internal Server Error");
+    });
+};
+
 // Retrieve all Posts from the database.
+/*
 exports.findAll = (req, res) => {
   Post.findAll()
     .then((posts) => {
@@ -97,6 +120,25 @@ exports.findAll = (req, res) => {
     });
 };
 // Find a single Post with an id
+*/
+exports.findOne = (req, res) => {
+  const PostId = req.params.id;
+  Post.findByPk(PostId, {
+    include: [Comment, Like, User], // Укажите модели, которые вы хотите включить
+  })
+    .then((post) => {
+      if (!post) {
+        return res.status(404).send("Пост не найден");
+      }
+      res.send(post);
+    })
+    .catch((error) => {
+      console.error("Ошибка при поиске поста:", error);
+      res.status(500).send("Внутренняя ошибка сервера");
+    });
+};
+/*
+
 
 exports.findOne = (req, res) => {
   const PostId = req.params.id;
@@ -164,7 +206,7 @@ exports.findOne = (req, res) => {
         .send({ message: "Произошла ошибка при получении поста." });
     });
 };
-
+*/
 // Update a Post by the id in the request
 exports.update = (req, res) => {
   const id = req.params.id;

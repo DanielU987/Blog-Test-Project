@@ -13,7 +13,7 @@
           <div class="card shadow-sm">
             <div class="card-header">
               <font-awesome-icon icon="circle-user" />
-              {{ post.creator }}
+              {{ post.Users[0].username }}
             </div>
             <div class="image-container">
               <img class="bd-placeholder-img card-img-top" :src="getPostImage(post)" alt="Post Image" />
@@ -30,9 +30,13 @@
                     class="btn btn-sm btn-outline-secondary">Edit</router-link>
                 </div>
                 <!-- Добавляем кнопку для лайков -->
+                
+                <button class="btn btn-sm btn-outline-secondary" disabled>
+                  <font-awesome-icon icon="fa fa-comment"/> {{ post.Comments.length }}
+                </button>
                 <button @click="toggleLike(post.id)" class="btn btn-sm"
-                  :class="{ 'btn-primary': !post.isLiked, 'btn-danger': post.isLiked }">
-                  <font-awesome-icon icon="fa-solid fa-heart" /> {{ post.likes }}
+                  :class="{ 'btn-primary': !post.isLiked, 'btn-danger': post.isLiked }">                  
+                  <font-awesome-icon icon="fa-solid fa-heart" /> {{ post.Likes.length }}
                 </button>
               </div>
             </div>
@@ -69,7 +73,8 @@ export default {
     ...mapActions('post', ['loadPosts', 'likePost', 'unlikePost', 'checkIfLiked']),
     retrievePosts() {
       this.$store.dispatch('post/loadPosts')
-        .then(() => {
+        .then((response) => {
+          console.log(response)
           this.loading = false;
         })
         .catch(error => {

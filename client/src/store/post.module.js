@@ -33,6 +33,7 @@ export const post = {
           })
           .then((response) => {
             commit("setPosts", response.data);
+            console.log(response.data)
             return response.data; // Returning posts data
           })
           .then((posts) => {
@@ -41,15 +42,6 @@ export const post = {
               // After checking likes, update each post with isLiked property
               posts.forEach((post) => {
                 post.isLiked = isLikedMap.data[post.id] || false;
-              });
-              return posts; // Resolve with the updated posts
-            });
-          })
-          .then((posts) => {
-            // Call service to count likes for all posts
-            return LikeService.countAllLikesForAllPosts().then((likesMap) => {
-              posts.forEach((post) => {
-                post.likes = likesMap.data[post.id] || 0;
               });
               return posts; // Resolve with the updated posts
             });

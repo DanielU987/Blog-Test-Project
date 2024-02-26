@@ -89,8 +89,9 @@ export default {
     },
   },
   created() {
-    this.getPost().then(() => {
+    this.getPost().then((res) => {
       this.loading = false;
+      console.log("res",res)
       this.getComments(); // Загрузка комментариев при загрузке поста
     }).catch(error => {
       console.error('Error loading post:', error);
@@ -133,8 +134,6 @@ export default {
         });
     },
     getComments() {
-      // Загрузка комментариев для текущего поста
-      console.log(this.post.id)
       this.loadAllComments()
         .then((comments) => {
           console.log('Comments:', comments);

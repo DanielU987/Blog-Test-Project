@@ -8,9 +8,10 @@ import {
   faSignOutAlt,
   faPlus,
   faCircleUser,
-  faHeart
+  faHeart,
+  faComment
 } from "@fortawesome/free-solid-svg-icons";
 
-library.add(faHome,faHeart, faUser, faUserPlus,faPlus, faSignInAlt, faSignOutAlt,faCircleUser);
+library.add(faHome,faComment,faHeart, faUser, faUserPlus,faPlus, faSignInAlt, faSignOutAlt,faCircleUser);
 
 export { FontAwesomeIcon };

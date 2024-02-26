@@ -16,8 +16,8 @@ const Role = db.role;
 const User = db.user;
 const Posts = db.post;
 //{ force: true }
-//{alter: true}
-db.sequelize.sync().then(() => {
+//
+db.sequelize.sync({alter: true}).then(() => {
   console.log("Drop and Resync Db");
   //initial();
 });

@@ -3,6 +3,7 @@ module.exports = (app) => {
   const Comment = require("../controllers/comment.controller");
 
   router.post("/", Comment.createComment);
+  
   router.get("/", Comment.findAllCommentsForPosts);
   
   router.get("/:id", Comment.findAllCommentsForPost);
