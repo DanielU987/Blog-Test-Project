@@ -50,10 +50,10 @@ exports.findAll = (req, res) => {
       {
         model: User,
         attributes: ["id", "username"],
-        include: Like,
+        include: Like
       },
       { model: Like },
-      { model: Comment },
+      { model: Comment, include: User },
     ],
   })
     .then((data) => {

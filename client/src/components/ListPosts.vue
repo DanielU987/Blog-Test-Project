@@ -1,51 +1,49 @@
 <template>
-  <div class="album py-5 bg-light">
-    <div class="container">
-      <div class="row row-cols-1 row-cols-sm-1 row-cols-md-2 row-cols-xl-3 g-3">
-        <!-- Показывать загрузку, пока данные загружаются -->
-        <div v-if="loading" class="col text-center">
-          <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
-          </div>
+  <div class="container">
+    <div class="row">
+      <!-- Показывать загрузку, пока данные загружаются -->
+      <div v-if="loading" class="col-12 text-center">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
         </div>
-        <!-- Показывать посты, когда данные загрузились -->
-        <div v-else-if="posts" v-for="post in posts" :key="post.id" class="col">
-          <div class="card shadow-sm">
-            <div class="card-header">
-              <font-awesome-icon icon="circle-user" />
-              {{ post.Users[0].username }}
+      </div>
+      <!-- Показывать посты, когда данные загрузились -->
+      <div v-else-if="posts" v-for="post in posts" :key="post.id" class="col-12 mb-3">
+        <div class="card shadow-sm text-white">
+          <div class="card-header bg-dark  d-flex justify-content-between align-items-center py-2 px-3">
+            <div>
+              <font-awesome-icon icon="user" />
+              <span class="ms-2">{{ post.Users[0].username }}</span>
             </div>
+            <div class="btn-group">
+              <router-link :to="'/posts/' + post.id" class="btn btn-sm btn-outline-light me-1">View</router-link>
+              <router-link v-if="isCurrentUserPostOwner(post)" :to="'/posts/edit/' + post.id"
+                class="btn btn-sm btn-outline-light">Edit</router-link>
+            </div>
+          </div>
+
+          <div class="card-body bg-dark  py-3 px-3">
+            <h5 class="card-title"><router-link :to="'/posts/' + post.id" class="text-white">{{ post.title }}</router-link></h5>
+            <p class="card-text">{{ post.content }}</p>
             <div class="image-container">
-              <img class="bd-placeholder-img card-img-top" :src="getPostImage(post)" alt="Post Image" />
-            </div>
-            <div class="card-body">
-              <h5>
-                <router-link :to="'/posts/' + post.id" class="text-dark">{{ post.title }}</router-link>
-              </h5>
-              <p class="card-text">{{ post.content }}</p>
-              <div class="d-flex justify-content-between align-items-center">
-                <div class="btn-group">
-                  <router-link :to="'/posts/' + post.id" class="btn btn-sm btn-outline-secondary">View</router-link>
-                  <router-link v-if="isCurrentUserPostOwner(post)" :to="'/posts/edit/' + post.id"
-                    class="btn btn-sm btn-outline-secondary">Edit</router-link>
-                </div>
-                <!-- Добавляем кнопку для лайков -->
-                
-                <button class="btn btn-sm btn-outline-secondary" disabled>
-                  <font-awesome-icon icon="fa fa-comment"/> {{ post.Comments.length }}
-                </button>
-                <button @click="toggleLike(post.id)" class="btn btn-sm"
-                  :class="{ 'btn-primary': !post.isLiked, 'btn-danger': post.isLiked }">                  
-                  <font-awesome-icon icon="fa-solid fa-heart" /> {{ post.Likes.length }}
-                </button>
-              </div>
+              <img class="bd-placeholder-img" :src="getPostImage(post)" alt="Post Image" />
             </div>
           </div>
+          <div class="card-footer bg-dark py-2 px-3">
+
+              <button @click="toggleLike(post.id)" class="btn btn-sm me-1"
+                :class="{ 'btn-outline-light': !post.isLiked, 'btn-outline-danger': post.isLiked }">
+                <font-awesome-icon icon="fa fa-heart" /> {{ post.Likes.length }}
+              </button>
+              <router-link :to="'/posts/' + post.id" class="btn btn-sm btn-outline-light me-1">
+                <font-awesome-icon icon="fa fa-comment" /> {{ post.Comments.length }}
+              </router-link>
+          </div>
         </div>
-        <!-- Показать сообщение, если постов нет -->
-        <div v-else class="col text-center">
-          <p>No posts available.</p>
-        </div>
+      </div>
+      <!-- Показать сообщение, если постов нет -->
+      <div v-else class="col-12 text-center">
+        <p>No posts available.</p>
       </div>
     </div>
   </div>
@@ -83,7 +81,10 @@ export default {
     },
     isCurrentUserPostOwner(post) {
       const currentUser = this.$store.state.auth.user;
-      return currentUser && post.creator === currentUser.username;
+      if (currentUser && post.Users.length > 0) {
+        return post.Users.some(user => user.username === currentUser.username);
+      }
+      return false;
     },
     getPostImage(post) {
       if (post.image && post.image.type === 'Buffer') {
@@ -96,12 +97,9 @@ export default {
     toggleLike(postId) {
       const post = this.getPostById(postId);
       if (!post) return;
-
       const likeAction = post.isLiked ? 'unlikePost' : 'likePost';
+
       this.$store.dispatch(`post/${likeAction}`, postId)
-        .then(() => {
-          console.log('Like toggled successfully');
-        })
         .catch(error => {
           console.error("Error occurred while toggling like:", error);
         });
@@ -113,6 +111,9 @@ export default {
 </script>
 
 <style scoped>
+.bg-dark{
+  background-color:#111417 !important;
+}
 .image-container {
   position: relative;
   width: 100%;
@@ -121,6 +122,14 @@ export default {
   overflow: hidden;
   background-color: #333;
   /* Цвет фона */
+}
+
+
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .image-container img {

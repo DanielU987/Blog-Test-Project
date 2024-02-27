@@ -1,4 +1,3 @@
-// post.module.js
 import PostService from "../services/post.service";
 import LikeService from "../services/like.service";
 
@@ -8,6 +7,53 @@ export const post = {
     posts: [],
     userId: null,
   },
+
+  actions: {
+    async loadPosts({ commit, dispatch }) {
+      try {
+        const userId = await dispatch("auth/getUserId", null, { root: true });
+        commit("setUserId", userId);
+        const response = await PostService.getAll();
+        const posts = response.data;
+        posts.forEach((post) => {
+          post.isLiked = post.Likes.some(like => like.UserId === userId);
+        });
+        commit("setPosts", posts);
+        return posts;
+      } catch (error) {
+        console.error("Error occurred while loading posts:", error);
+        throw error;
+      }
+    },
+    async likePost({ commit, state }, postId) {
+      try {
+        await LikeService.likePost(postId, state.userId);
+        commit("incrementPostLikes", postId);
+      } catch (error) {
+        console.error("Error occurred while liking post:", error);
+        throw error;
+      }
+    },
+    async unlikePost({ commit, state }, postId) {
+      try {
+        await LikeService.unlikePost(postId, state.userId);
+        commit("decrementPostLikes", postId);
+      } catch (error) {
+        console.error("Error occurred while unliking post:", error);
+        throw error;
+      }
+    },
+  },
+
+  getters: {
+    allPosts(state) {
+      return state.posts;
+    },
+    getPostById: (state) => (id) => {
+      return state.posts.find((post) => post.id === Number(id));
+    },
+  },
+
   mutations: {
     setPosts(state, posts) {
       state.posts = posts;
@@ -15,105 +61,19 @@ export const post = {
     setUserId(state, userId) {
       state.userId = userId;
     },
-    updatePostLikes(state, { postId, likes, isLiked }) {
-      const postToUpdate = state.posts.find((post) => post.id === postId);
-      if (postToUpdate) {
-        postToUpdate.likes = likes.data["count"];
-        postToUpdate.isLiked = isLiked;
+    incrementPostLikes(state, postId) {
+      const post = state.posts.find((post) => post.id === postId);
+      if (post) {
+        post.Likes.push({});
+        post.isLiked = true;
       }
     },
-  },
-  actions: {
-    loadPosts({ commit, dispatch, state }) {
-      return new Promise((resolve, reject) => {
-        dispatch("auth/getUserId", null, { root: true }) // Dispatch action to get userId from auth module
-          .then((userId) => {
-            commit("setUserId", userId);
-            return PostService.getAll();
-          })
-          .then((response) => {
-            commit("setPosts", response.data);
-            console.log(response.data)
-            return response.data; // Returning posts data
-          })
-          .then((posts) => {
-            // Call service to check if each post is liked by the user
-            return LikeService.checkIfLiked(state.userId).then((isLikedMap) => {
-              // After checking likes, update each post with isLiked property
-              posts.forEach((post) => {
-                post.isLiked = isLikedMap.data[post.id] || false;
-              });
-              return posts; // Resolve with the updated posts
-            });
-          })
-          .then((posts) => {
-            resolve(posts); // Resolve with the updated posts
-          })
-          .catch((error) => {
-            console.error("Error occurred while loading posts:", error);
-            reject(error);
-          });
-      });
-    },
-    likePost({ commit, state }, postId) {
-      return new Promise((resolve, reject) => {
-        LikeService.likePost(postId, state.userId)
-          .then(() => {
-            return LikeService.countAllLikesForOnePost(postId);
-          })
-          .then((updatedLikes) => {
-            commit("updatePostLikes", {
-              postId,
-              likes: updatedLikes,
-              isLiked: true,
-            });
-            resolve();
-          })
-          .catch((error) => {
-            console.error("Error occurred while liking post:", error);
-            reject(error);
-          });
-      });
-    },
-    unlikePost({ commit, state }, postId) {
-      return new Promise((resolve, reject) => {
-        LikeService.unlikePost(postId, state.userId)
-          .then(() => {
-            return LikeService.countAllLikesForOnePost(postId);
-          })
-          .then((updatedLikes) => {
-            commit("updatePostLikes", {
-              postId,
-              likes: updatedLikes,
-              isLiked: false,
-            });
-            resolve();
-          })
-          .catch((error) => {
-            console.error("Error occurred while unliking post:", error);
-            reject(error);
-          });
-      });
-    },
-
-    checkIfLiked({ commit }, { postId, userId }) {
-      return LikeService.checkIfLiked(postId, userId)
-        .then((response) => {
-          return response.data;
-        })
-        .catch((error) => {
-          console.error("Error occurred while checking if liked:", error);
-          throw error;
-        });
-    },
-  },
-  getters: {
-    allPosts(state) {
-      return state.posts;
-    },
-    // геттер для получения поста по его id
-    getPostById: (state) => (id) => {
-      return state.posts.find((post) => post.id === Number(id));
+    decrementPostLikes(state, postId) {
+      const post = state.posts.find((post) => post.id === postId);
+      if (post) {
+        post.Likes.pop();
+        post.isLiked = false;
+      }
     },
   },
 };
