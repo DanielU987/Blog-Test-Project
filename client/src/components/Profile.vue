@@ -1,7 +1,6 @@
 <template>
   <div class="container h-100">
     <div class="row d-flex justify-content-center align-items-center h-100">
-      <div class="card">
         <div class="rounded-top text-white d-flex flex-row" style="background-color: #000; height: 200px">
           <div class="ms-4 mt-5 d-flex flex-column" style="width: 150px">
             <img src="//ssl.gstatic.com/accounts/ui/avatar_2x.png" alt="Default Profile Image"
@@ -33,83 +32,101 @@
             </div>
           </div>
         </div>
-        <div class="album py-5 bg-light">
           <div class="container">
-            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
-              <div class="col" v-for="post in posts" :key="post.id">
-                <div class="card shadow-sm">
-                  <div class="image-container">
-                    <img class="bd-placeholder-img card-img-top" :src="getPostImage(post)" alt="Post Image" />
+            <div class="row">
+              <div v-for="post in posts" :key="post.id" class="col-12 mb-3">
+                <div class="card shadow-sm text-white bg-dark">
+                  <div class="card-header d-flex justify-content-between align-items-center py-2 px-3">
+                    <div>
+                      <router-link :to="'/auth/profile/' + post.Users[0].username" class="nav-link">
+                        <font-awesome-icon icon="user" />
+                        <span class="ms-2">{{ post.Users[0].username }}</span>
+                      </router-link>
+                    </div>
+                    <div class="btn-group">
+                      <router-link :to="'/posts/' + post.id" class="btn btn-sm btn-outline-light me-1">View</router-link>
+                      <router-link v-if="isCurrentUserPostOwner(post)" :to="'/posts/edit/' + post.id"
+                        class="btn btn-sm btn-outline-light">Edit</router-link>
+                    </div>
                   </div>
-                  <div class="card-body">
-                    <h5>
-                      <router-link :to="'/posts/' + post.id" class="text-dark">{{ post.title }}</router-link>
+
+                  <div class="card-body py-3 px-3">
+                    <h5 class="card-title">
+                      <router-link :to="'/posts/' + post.id" class="text-white">
+                        {{ post.title }}
+                      </router-link>
                     </h5>
                     <p class="card-text">{{ post.content }}</p>
-                    <div class="d-flex justify-content-between align-items-center">
-                      <div class="btn-group">
-                        <router-link :to="'/posts/' + post.id" class="btn btn-sm btn-outline-secondary">View</router-link>
-                        <router-link :to="'/posts/edit/' + post.id"
-                          class="btn btn-sm btn-outline-secondary">Edit</router-link>
-                      </div>
+                    <div class="image-container d-flex justify-content-center align-items-center">
+                      <img class="bd-placeholder-img img-fluid" :src="getPostImage(post)" alt="Post Image" />
                     </div>
+                  </div>
+                  <div class="card-footer py-2 px-3">
+                    <button @click="toggleLike(post.id)" class="btn btn-sm me-1"
+                      :class="{ 'btn-outline-light': !post.isLiked, 'btn-outline-danger': post.isLiked }">
+                      <font-awesome-icon icon="fa fa-heart" /> {{ post.Likes.length }}
+                    </button>
+                    <router-link :to="'/posts/' + post.id" class="btn btn-sm btn-outline-light me-1">
+                      <font-awesome-icon icon="fa fa-comment" /> {{ post.Comments.length }}
+                    </router-link>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
         </div>
       </div>
     </div>
-  </div>
+ 
 </template>
-
 <script>
-import authService from "@/services/auth.service";
-import PostService from "../services/post.service";
+import { mapState, mapActions, mapGetters } from 'vuex';
 
 export default {
-  name: "Profile",
-  computed: {
-    currentUser() {
-      return this.$store.state.auth.user;
-    }
-    
-  },
   data() {
     return {
-      posts: [],
+      loading: true,
     };
+  },
+  name: "Profile",
+  computed: {
+    ...mapState({
+      currentUser: state => state.auth.user,
+      posts: state => state.post.posts
+    }),
+
+    ...mapGetters('post', ['allPosts', 'getPostsByUser']),
+
+    posts() {
+      console.log(this.$route.params)
+      return this.getPostsByUser(this.$route.params["username"])
+    }
+
   },
   mounted() {
     if (!this.currentUser) {
       this.$router.push("/login");
+    } else {
+      this.$store.dispatch('post/loadPosts')
+      this.loading = false;
+
     }
-    this.retrievePosts();
   },
   methods: {
-    retrievePosts() {
-      PostService.getAll()
-        .then((response) => {
-          // Фильтруем посты по создателю
-          this.posts = response.data.filter(
-            (post) => post.creator === this.currentUser.username
-          );
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-    },
-    async deleteUserAndPosts() {
-      const userId = this.$store.state.auth.user.id;
+    ...mapActions('post', ['loadPosts', 'likePost', 'unlikePost']),
+    deleteUserAndPosts() {
+      const userId = this.currentUser.id;
       try {
-        const result = await authService.deleteUserAndPosts(
-          this.currentUser.id
-        );
-        console.log(result);
+        // Call the action to delete user and posts
       } catch (error) {
         console.error("Error deleting user and posts:", error);
       }
+    },
+    isCurrentUserPostOwner(post) {
+      const currentUser = this.$store.state.auth.user;
+      if (currentUser && post.Users.length > 0) {
+        return post.Users.some(user => user.username === currentUser.username);
+      }
+      return false;
     },
     getPostImage(post) {
       if (post.image && post.image.type === "Buffer") {
@@ -121,23 +138,35 @@ export default {
   },
 };
 </script>
+
+
 <style scoped>
-.card, .album {
-  padding: 0 !important;
+.bg-dark {
+  background-color: #111417 !important;
 }
 
 .image-container {
   position: relative;
-  width: 100%;
-  height: 225px; /* Высота изображения */
-  overflow: hidden;
-  background-color: #333; /* Цвет фона */
 }
 
 .image-container img {
   width: 100%;
-  height: 100%;
-  object-fit: cover; /* Изображение будет сжиматься или растягиваться чтобы полностью заполнить контейнер */
+  height: auto;
 }
 
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.card {
+  margin-bottom: 20px;
+}
 </style>

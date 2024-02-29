@@ -43,6 +43,7 @@ export const post = {
         throw error;
       }
     },
+    
   },
 
   getters: {
@@ -51,6 +52,11 @@ export const post = {
     },
     getPostById: (state) => (id) => {
       return state.posts.find((post) => post.id === Number(id));
+    },
+    getPostsByUser: (state) => (username) => {
+      console.log(username)
+      console.log(state.posts.filter(post => post.Users[0].username === username));
+      return state.posts.filter(post => post.Users[0].username === username)
     },
   },
 

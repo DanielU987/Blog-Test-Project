@@ -1,7 +1,7 @@
 <template>
   <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
     <div class="container">
-      <router-link to="/posts" class="navbar-brand" >MyBlog</router-link>
+      <router-link to="/posts" class="navbar-brand">MyBlog</router-link>
       <button
         class="navbar-toggler"
         type="button"
@@ -28,7 +28,21 @@
           </li>
         </ul>
 
-        <div v-if="!currentUser" class="navbar-nav ml-auto">
+        <div v-if="currentUser" class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <router-link :to="'/auth/profile/' + currentUser.username" class="nav-link">
+              <font-awesome-icon icon="user" />
+              {{ currentUser.username }}
+            </router-link>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" @click.prevent="logOut">
+              <font-awesome-icon icon="sign-out-alt" /> LogOut
+            </a>
+          </li>
+        </div>
+
+        <div v-else class="navbar-nav ml-auto">
           <li class="nav-item">
             <router-link to="/auth/login" class="nav-link">
               <font-awesome-icon icon="sign-in-alt" /> Login
@@ -40,43 +54,16 @@
             </router-link>
           </li>
         </div>
-
-        <div v-if="currentUser" class="navbar-nav ml-auto">
-          <li class="nav-item">
-            <router-link to="/auth/profile" class="nav-link">
-              <font-awesome-icon icon="user" />
-              {{ currentUser.username }}
-            </router-link>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" @click.prevent="logOut">
-              <font-awesome-icon icon="sign-out-alt" /> LogOut
-            </a>
-          </li>
-        </div>
       </div>
     </div>
   </nav>
 </template>
+
 <script>
 export default {
   computed: {
     currentUser() {
       return this.$store.state.auth.user;
-    },
-    showAdminBoard() {
-      if (this.currentUser && this.currentUser["roles"]) {
-        return this.currentUser["roles"].includes("ROLE_ADMIN");
-      }
-
-      return false;
-    },
-    showModeratorBoard() {
-      if (this.currentUser && this.currentUser["roles"]) {
-        return this.currentUser["roles"].includes("ROLE_MODERATOR");
-      }
-
-      return false;
     },
   },
   methods: {
@@ -87,4 +74,12 @@ export default {
   },
 };
 </script>
-<style></style>
+
+<style scoped>
+@media (max-width: 767px) {
+  nav {
+    display: none !important;
+  }
+}
+
+</style>

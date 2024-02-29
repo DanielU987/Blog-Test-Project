@@ -3,14 +3,19 @@
   <div class="container bg-black">
     <router-view></router-view>
   </div>
-  
+  <Footer />
 </template>
 
 <script>
 import Navbar from "./views/Navbar.vue";
+import PostList from "@/components/ListPosts.vue";
+import Footer from "./views/Footer.vue"
+
 export default {
   components: {
-    Navbar
+    Navbar,
+    PostList,
+    Footer
   },
 };
 </script>
@@ -21,11 +26,17 @@ export default {
   color:white !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #2c2d30;
 }
+.bg-dark {
+  background-color: #111417 !important;
+}
+
+body{
+  background-color: black;
+}
+
 .card {
-  border-radius: 25px;
-  background-color: #202225;
+  background-color: #36454F;
 }
 
 .container {

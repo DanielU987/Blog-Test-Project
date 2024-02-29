@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import Home from "./views/Home.vue";
+import Home from "./components/ListPosts.vue";
 
 import EditPost from "./components/EditPost.vue";
 
@@ -23,7 +23,7 @@ const routes = [
   { path: "/auth/register", component: RegisterUser, name: "RegisterUser" },
   { path: "/auth/login", component: LoginUser, name: "LoginUser" },
   { path: "/auth/user", component: BoardUser, name: "BoardUser" },
-  { path: "/auth/profile", component: Profile, name: "Profile" },
+  { path: "/auth/profile/:username", component: Profile, name: "Profile" },
   { path: "/auth/mod", component: BoardModerator, name: "moderator" },
   { path: "/auth/admin", component: BoardAdmin, name: "admin" },
   // Другие маршруты...
