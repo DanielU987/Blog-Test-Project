@@ -18,6 +18,7 @@ export const post = {
         posts.forEach((post) => {
           post.isLiked = post.Likes.some(like => like.UserId === userId);
         });
+        console.log(posts)
         commit("setPosts", posts);
         return posts;
       } catch (error) {

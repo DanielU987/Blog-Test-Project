@@ -1,6 +1,6 @@
 <template>
   <Navbar />
-  <div class="container bg-black">
+  <div class="container">
     <router-view></router-view>
   </div>
   <Footer />
@@ -28,11 +28,11 @@ export default {
   -moz-osx-font-smoothing: grayscale;
 }
 .bg-dark {
-  background-color: #111417 !important;
+  background-color: #232322 !important;
 }
 
 body{
-  background-color: black;
+  background-color: #151514;
 }
 
 .card {

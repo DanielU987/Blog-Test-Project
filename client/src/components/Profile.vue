@@ -141,9 +141,6 @@ export default {
 
 
 <style scoped>
-.bg-dark {
-  background-color: #111417 !important;
-}
 
 .image-container {
   position: relative;

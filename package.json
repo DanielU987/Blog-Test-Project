@@ -21,6 +21,7 @@
     "bootstrap-vue": "^2.23.1",
     "browserify": "^17.0.0",
     "browserify-fs": "^1.0.0",
+    "concurrently": "^8.2.2",
     "connect-pg-simple": "^9.0.1",
     "core-js": "^3.8.3",
     "cors": "^2.8.5",

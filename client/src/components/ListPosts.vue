@@ -1,5 +1,4 @@
 <template>
-  <div class="container">
     <div class="row">
       <div v-if="loading" class="col-12 text-center">
         <div class="spinner-border text-primary" role="status">
@@ -51,7 +50,6 @@
         <p>No posts available.</p>
       </div>
     </div>
-  </div>
 </template>
 
 <script>
@@ -123,9 +121,6 @@ export default {
 </script>
 
 <style scoped>
-.bg-dark {
-  background-color: #111417 !important;
-}
 
 .image-container {
   position: relative;
