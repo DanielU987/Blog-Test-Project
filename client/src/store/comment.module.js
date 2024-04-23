@@ -22,9 +22,11 @@ export const comment = {
         (comment) => comment.id !== commentId
       );
     },
+    
   },
   actions: {
     async createComment({ commit }, { userId, postId, content }) {
+      console.log(userId,postId,content)
       try {
         const response = await CommentService.createComment({ userId, postId, content });
         commit("addComment", response.data);
@@ -35,10 +37,12 @@ export const comment = {
       }
     },
 
-    async loadCommentsForPost({ commit }, postId) {
+    async loadPostComments({ commit }, postId) {
       try {
         const response = await CommentService.getCommentsByPostId(postId);
         commit("setComments", response.data);
+        console.log("Comments loaded successfully for post with id:", postId); // Добавляем вывод в консоль
+
         return response.data;
       } catch (error) {
         console.error("Error loading comments for post:", error);

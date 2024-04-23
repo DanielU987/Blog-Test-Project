@@ -1,18 +1,18 @@
 <template>
   <div class="container">
     <div class="row justify-content-center">
-      <div class="col-md-8 col-sm-12">
+      <div class="col-md-6 col-sm-12">
         <div class="submit-form">
-          <div class="card shadow-sm">
+          <div class="card shadow-sm bg-dark text-white">
             <input type="file" id="image" @change="handleImageChange" accept="image/*" class="form-control" />
-            <img :src="getPostImage(post)" class="card-img-top" alt="Your image here" />
+            <img :src="getPostImage(post)" class="card-img-top"  alt="Your image here" />
             <div class="card-footer">
               <div class="mb-3">
-                <label for="title" class="form-label">Заголовок:</label>
+                <label for="title" class="form-label">Title:</label>
                 <input type="text" id="title" v-model="post.title" required class="form-control" />
               </div>
               <div class="mb-3">
-                <label for="content" class="form-label">Содержание:</label>
+                <label for="content" class="form-label">Content:</label>
                 <textarea id="content" v-model="post.content" required class="form-control"></textarea>
               </div>
             </div>
@@ -90,7 +90,7 @@ export default {
           return `data:image/png;base64, ${post.image}`;
         }
       } else {
-        return "//ssl.gstatic.com/accounts/ui/avatar_2x.png"
+        return '/img/blankImage.6cd3ee3e.jpg'
       }
     },
   },

@@ -1,23 +1,24 @@
 <template>
-  <div class="form-placeholder text-center">
+  <div class="form-placeholder ">
     <div class="form-signup">
       <Form @submit="handleRegister" :validation-schema="schema">
         <h1 class="h3 mb-3 fw-normal">Sign up</h1>
         <div v-if="!successful">
-          <div class="form-floating mb-3">
-            <Field type="username" name="username" class="form-control" id="floatingInput" placeholder="CoolName123" />
+          <div class="form-group">
             <label for="floatingInput">Username</label>
-            <ErrorMessage name="username" class="error-feedback" />
+            <Field type="username" name="username" class="form-control" id="floatingInput" />
+            <small class="form-text text-warning"><ErrorMessage name="username" class="error-feedback" /></small>
+            
           </div>
-          <div class="form-floating mb-3">
-            <Field type="email" name="email" class="form-control" id="floatingEmail" placeholder="CoolName123" />
+          <div class="form-group">
             <label for="floatingEmail">Email</label>
-            <ErrorMessage name="email" class="error-feedback" />
+            <Field type="email" name="email" class="form-control" id="floatingEmail" />
+            <small class="form-text text-warning"><ErrorMessage name="email" class="error-feedback" /></small>
           </div>
-          <div class="form-floating mb-3">
-            <Field type="password" name="password" class="form-control" id="floatingPassword" placeholder="Password" />
+          <div class="form-group">
             <label for="floatingPassword">Password</label>
-            <ErrorMessage name="password" class="error-feedback" />
+            <Field type="password" name="password" class="form-control text-primary" id="floatingPassword" />
+            <small class="form-text text-warning"><ErrorMessage name="password" class="error-feedback" /></small>
           </div>
 
           <div class="form-group">
@@ -139,7 +140,7 @@ body,
   margin: auto;
 }
 
-.form-signup .form-floating:focus-within {
+.form-signup .form-group:focus-within {
   z-index: 2;
 }
 

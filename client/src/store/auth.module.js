@@ -37,16 +37,17 @@ export const auth = {
       }
     },
     getUserId({ state }) {
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         if (state.user) {
           resolve(state.user.id);
         } else {
-          reject("User not logged in");
+          resolve("User not logged in");
         }
       });
     },
   },
   mutations: {
+
     loginSuccess(state, user) {
       state.status.loggedIn = true;
       state.user = user;

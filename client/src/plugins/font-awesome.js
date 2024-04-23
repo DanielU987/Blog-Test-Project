@@ -1,4 +1,4 @@
-import { library } from "@fortawesome/fontawesome-svg-core";
+import { library,config  } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import {
   faHome,
@@ -8,9 +8,11 @@ import {
   faSignOutAlt,
   faPlus,
   faHeart,
-  faComment
+  faComment,
+  faCircleUser,
+  faPaperPlane
 } from "@fortawesome/free-solid-svg-icons";
 
-library.add(faHome,faComment,faHeart, faUser, faUserPlus,faPlus, faSignInAlt, faSignOutAlt,faUser);
+library.add(faHome,faComment,faHeart,faCircleUser,faPaperPlane, faUser, faUserPlus,faPlus, faSignInAlt, faSignOutAlt,faUser);
 
 export { FontAwesomeIcon };

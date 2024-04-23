@@ -11,9 +11,9 @@
               Delete profile
             </button>
           </div>
-          <div class="ms-3" style="margin-top: 130px" v-if="currentUser">
-            <h5>{{ currentUser.username }}</h5>
-            <p>{{ currentUser.email }}</p>
+          <div class="ms-3" style="margin-top: 130px" v-if="this.profile">
+            <h5>{{ this.profile.username }}</h5>
+            <p>{{ this.profile.email }}</p>
           </div>
         </div>
         <div class="p-4 text-black" style="background-color: #f8f9fa">
@@ -85,6 +85,10 @@ export default {
   data() {
     return {
       loading: true,
+      profile: {
+        username: null,
+        email: null
+      }
     };
   },
   name: "Profile",
@@ -92,14 +96,16 @@ export default {
     ...mapState({
       currentUser: state => state.auth.user,
       posts: state => state.post.posts
-    }),
 
-    ...mapGetters('post', ['allPosts', 'getPostsByUser']),
+    }),
+    
+    ...mapGetters('post', ['allPosts', 'getPostsByUser', 'getUserByName']),
 
     posts() {
-      console.log(this.$route.params)
       return this.getPostsByUser(this.$route.params["username"])
     }
+
+    
 
   },
   mounted() {
@@ -107,6 +113,15 @@ export default {
       this.$router.push("/login");
     } else {
       this.$store.dispatch('post/loadPosts')
+      .then(() => {
+          // Загружаем посты пользователя с определенным именем при успешной загрузке всех постов
+          this.profile = this.getUserByName(this.$route.params.username);
+          this.loading = false;
+        })
+        .catch(error => {
+          console.error("Error loading posts:", error);
+          this.loading = false;
+        });
       this.loading = false;
 
     }

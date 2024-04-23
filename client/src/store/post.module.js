@@ -12,13 +12,22 @@ export const post = {
     async loadPosts({ commit, dispatch }) {
       try {
         const userId = await dispatch("auth/getUserId", null, { root: true });
+        if (!userId) {
+          const response = await PostService.getAll();
+          const posts = response.data;
+          commit("setPosts", posts);
+          return posts;
+        }
+  
         commit("setUserId", userId);
         const response = await PostService.getAll();
         const posts = response.data;
         posts.forEach((post) => {
-          post.isLiked = post.Likes.some(like => like.UserId === userId);
+          post.isLiked = post.Likes.some((like) => like.UserId === userId);
+          // Сортировка комментариев по их ID в порядке возрастания
+          post.Comments.sort((a, b) => a.id - b.id);
         });
-        console.log(posts)
+        console.log(posts);
         commit("setPosts", posts);
         return posts;
       } catch (error) {
@@ -44,7 +53,6 @@ export const post = {
         throw error;
       }
     },
-    
   },
 
   getters: {
@@ -55,10 +63,19 @@ export const post = {
       return state.posts.find((post) => post.id === Number(id));
     },
     getPostsByUser: (state) => (username) => {
-      console.log(username)
-      console.log(state.posts.filter(post => post.Users[0].username === username));
-      return state.posts.filter(post => post.Users[0].username === username)
+      return state.posts.filter((post) => post.Users[0].username === username);
     },
+    getUserByName: (state) => (username) => {
+      const user = state.posts.find(post => post.Users[0].username === username);
+      if (user) {
+        return {
+          username: user.Users[0].username,
+          email: user.Users[0].email
+        };
+      } else {
+        return null;
+      }
+    }
   },
 
   mutations: {

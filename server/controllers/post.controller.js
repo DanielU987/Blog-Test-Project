@@ -49,7 +49,7 @@ exports.findAll = (req, res) => {
     include: [
       {
         model: User,
-        attributes: ["id", "username"],
+        attributes: ["id", "username", "email"],
         include: Like
       },
       { model: Like },
@@ -57,6 +57,7 @@ exports.findAll = (req, res) => {
     ],
   })
     .then((data) => {
+      console.log(data)
       res.send(data);
     })
     .catch((error) => {

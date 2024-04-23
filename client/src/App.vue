@@ -36,7 +36,7 @@ body{
 }
 
 .card {
-  background-color: #36454F;
+  background-color: #232322;
 }
 
 .container {

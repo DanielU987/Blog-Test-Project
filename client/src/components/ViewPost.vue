@@ -8,7 +8,7 @@
           </div>
         </div>
         <div v-else>
-          <div v-if="post" class="card shadow-sm">
+          <div v-if="post" class="card shadow-sm bg-dark text-white">
             <div class="card-header">
               <font-awesome-icon icon="circle-user" />
               {{ post.Users[0].username }}

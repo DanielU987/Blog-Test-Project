@@ -1,19 +1,20 @@
 <template>
-  <div class="form-placeholder text-center">
+  <div class="form-placeholder">
     <div class="form-signin">
       <Form @submit="handleLogin" :validation-schema="schema">
         <h1 class="h3 mb-3 fw-normal">Sign in</h1>
 
-        <div class="form-floating mb-3">
-          <Field type="username" name="username" class="form-control" id="floatingInput" placeholder="CoolName123" />
+        <div class="form-group mb-3">
           <label for="floatingInput">Username</label>
-          <ErrorMessage name="username" class="error-feedback" />
+          <Field type="username" name="username" class="form-control" id="floatingInput" />
+          
+          <small class="form-text text-warning"><ErrorMessage name="username" class="error-feedback" /></small>
         </div>
 
-        <div class="form-floating mb-3">
-          <Field type="password" name="password" class="form-control" id="floatingPassword" placeholder="Password" />
+        <div class="form-group mb-3">
           <label for="floatingPassword">Password</label>
-          <ErrorMessage name="password" class="error-feedback" />
+          <Field type="password" name="password" class="form-control" id="floatingPassword"/>
+          <small class="form-text text-warning"><ErrorMessage name="password" class="error-feedback" /></small>
         </div>
 
         <div class="form-group">
@@ -63,7 +64,8 @@ export default {
   },
   created() {
     if (this.loggedIn) {
-      this.$router.push("/auth/profile");
+      console.log(user)
+      this.$router.push("/auth/profile/"+user.username);
     }
   },
   methods: {
@@ -72,7 +74,7 @@ export default {
 
       this.$store.dispatch("auth/login", user).then(
         () => {
-          this.$router.push("/auth/profile");
+          this.$router.push("/auth/profile/" +user.username);
         },
         (error) => {
           this.loading = false;
@@ -111,7 +113,7 @@ body,
   margin: auto;
 }
 
-.form-signin .form-floating:focus-within {
+.form-signin .form-group:focus-within {
   z-index: 2;
 }
 
