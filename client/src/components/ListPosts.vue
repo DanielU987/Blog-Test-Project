@@ -31,49 +31,62 @@
           <div class="image-container d-flex justify-content-center align-items-center">
             <img class="bd-placeholder-img img-fluid second-image" :src="getPostImage(post)" />
           </div>
-          <button @click="toggleLike(post.id)" class="btn btn-sm me-1" :class="{
-      'btn-outline-light': !post.isLiked,
-      'btn-outline-danger': post.isLiked,
-    }">
+          <button @click="toggleLike(post.id)" class="btn btn-sm me-1"
+            :class="{ 'btn-outline-light': !post.isLiked, 'btn-outline-danger': post.isLiked, }">
             <font-awesome-icon icon="fa fa-heart" /> {{ post.Likes.length }}
           </button>
-          <router-link :to="'/posts/' + post.id" class="btn btn-sm btn-outline-light me-1">
+          <button @click="toggleCommentInput(post.id)" class="btn btn-sm btn-outline-light me-1">
             <font-awesome-icon icon="fa fa-comment" />
             {{ post.Comments.length }}
-          </router-link>
+          </button>
         </div>
 
-        <div v-if="post.Comments.length > 0" class="card-footer bg-dark py-2 px-3">
-          <ul class="list-group">
-            <!-- Показывать только первый комментарий, если статус поста showAllComments равен false -->
-            <li v-if="!post.showAllComments && post.Comments[0].User" class="list-group-item bg-dark text-white">
-              <div class="font-weight-bold">
-                <font-awesome-icon icon="user" />{{ post.Comments[0].User.username }}
+        <div class="card-footer bg-dark py-2 px-3">
+          <div v-if="post.Comments.length > 0">
+            <ul class="list-group">
+              <!-- Показывать только первый комментарий, если статус поста showAllComments равен false -->
+              <li v-if="!post.showAllComments && post.Comments[0].User" class="list-group-item bg-dark text-white">
+                <div class="font-weight-bold">
+                  <font-awesome-icon icon="user" />{{ post.Comments[0].User.username }}
+                </div>
+                <div>{{ post.Comments[0].content }}</div>
+              </li>
+              <!-- Показывать все комментарии, если статус поста showAllComments равен true -->
+              <li v-else v-for="comment in post.Comments" :key="comment.id" class="list-group-item bg-dark text-white">
+                <div class="font-weight-bold">
+                  <font-awesome-icon icon="user" />{{ comment.User && comment.User.username }}
+                </div>
+                <div>{{ comment.content }}</div>
+              </li>
+            </ul>
+            <form @submit.prevent="addComment(post.id)" class="flex-grow-1">
+              <div class="input-group ">
+                <input class="form-control bg-dark text-white" :id="'comment-input-' + post.id"
+                  v-model="commentInputs[post.id]" />
+                <div class="input-group-append">
+                  <button type="submit" class="btn btn-outline-secondary comment-btn"><font-awesome-icon
+                      icon="paper-plane" /></button>
+                </div>
               </div>
-              <div>{{ post.Comments[0].content }}</div>
-            </li>
-            <!-- Показывать все комментарии, если статус поста showAllComments равен true -->
-            <li v-else v-for="comment in post.Comments" :key="comment.id" class="list-group-item bg-dark text-white">
-              <div class="font-weight-bold">
-                <font-awesome-icon icon="user" />{{ comment.User && comment.User.username }}
-              </div>
-              <div>{{ comment.content }}</div>
-            </li>
-          </ul>
-          <form @submit.prevent="addComment(post.id)" class="flex-grow-1">
+            </form>
+            <!-- Кнопка для показа всех комментариев -->
+            <button @click="toggleComments(post)" class="btn btn-sm btn-outline-light mt-2">
+              {{ post.showAllComments ? 'Скрыть комментарии' : 'Показать все комментарии' }}
+            </button>
+          </div>
+          <form v-else v-if="showCommentForm[post.id]" @submit.prevent="addComment(post.id)" class="flex-grow-1">
             <div class="input-group ">
-              <input class="form-control bg-dark text-white" :v-model="commentInputs[post.id]" />
+              <input class="form-control bg-dark text-white" :id="'comment-input-' + post.id"
+                v-model="commentInputs[post.id]" />
               <div class="input-group-append">
-                <button type="submit" class="btn btn-outline-secondary comment-btn"><font-awesome-icon
-                    icon="paper-plane" /></button>
+                <button type="submit" class="btn btn-outline-secondary comment-btn">
+                  <font-awesome-icon icon="paper-plane" />
+                </button>
               </div>
             </div>
           </form>
-          <!-- Кнопка для показа всех комментариев -->
-          <button @click="toggleComments(post)" class="btn btn-sm btn-outline-light mt-2">
-            {{ post.showAllComments ? 'Скрыть комментарии' : 'Показать все комментарии' }}
-          </button>
         </div>
+
       </div>
     </div>
     <!-- Показать сообщение, если постов нет -->
@@ -90,6 +103,8 @@ export default {
   data() {
     return {
       loading: true,
+      commentInputs: {},
+      showCommentForm: {},
     };
   },
   computed: {
@@ -103,9 +118,6 @@ export default {
     userId() {
       return this.$store.dispatch("post/loadPosts")
     },
-    commentInputs() {
-      return {};
-    }
   },
   created() {
     this.retrievePosts();
@@ -119,9 +131,7 @@ export default {
     ]),
     ...mapActions('comment', ['createComment', 'loadPostComments']),
     ...mapMutations('comment', ['addCommentToPost']),
-    toggleComments(post) {
-      post.showAllComments = !post.showAllComments;
-    },
+
     retrievePosts() {
       this.$store
         .dispatch("post/loadPosts")
@@ -164,6 +174,23 @@ export default {
         console.error("Error occurred while toggling like:", error);
       });
     },
+    focusCommentInput(postId) {
+      this.$nextTick(() => {
+        const input = document.getElementById(`comment-input-${postId}`);
+        if (input) {
+          input.focus();
+        }
+      });
+    },
+    toggleCommentInput(postId) {
+      this.showCommentForm[postId] = !this.showCommentForm[postId];
+      if (this.showCommentForm[postId]) {
+        this.focusCommentInput(postId);
+      }
+    },
+    toggleComments(post) {
+      post.showAllComments = !post.showAllComments;
+    },
     async addComment(postId) {
       if (!this.isAuthenticated) {
         console.log("Пользователь не аутентифицирован");
@@ -173,24 +200,24 @@ export default {
         await this.createComment({
           postId: postId,
           userId: this.$store.state.auth.user.id,
-          content: this.newComment
+          content: this.commentInputs[postId]
         });
         console.log('Comment added successfully');
 
         const post = this.posts.find(post => post.id === postId);
 
         const cooment = {
-          content: this.newComment,
-          User:{
+          content: this.commentInputs[postId],
+          User: {
             username: this.$store.state.auth.user.username
           }
         }
 
         if (post && post.Comments) {
-      post.Comments.push(cooment);
-    }
-    console.log(post.Comments)
-        this.newComment = "";
+          post.Comments.push(cooment);
+        }
+        console.log(post.Comments)
+        this.commentInputs[postId] = "";
       } catch (error) {
         console.error('Error adding comment:', error);
       }
