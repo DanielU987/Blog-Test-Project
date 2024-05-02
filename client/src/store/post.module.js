@@ -27,7 +27,6 @@ export const post = {
           // Сортировка комментариев по их ID в порядке возрастания
           post.Comments.sort((a, b) => a.id - b.id);
         });
-        console.log(posts);
         commit("setPosts", posts);
         return posts;
       } catch (error) {

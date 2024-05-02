@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+  <nav class="navbar fixed-top navbar-expand-sm navbar-dark bg-dark">
     <div class="container">
       <router-link to="/posts" class="navbar-brand">MyBlog</router-link>
       <button
@@ -76,10 +76,10 @@ export default {
 </script>
 
 <style scoped>
+
 @media (max-width: 767px) {
   nav {
     display: none !important;
   }
 }
-
 </style>

@@ -62,14 +62,12 @@ export default {
     getPost(postId, userId) {
       PostService.get(postId, userId)
         .then((response) => {
-          if (!response.data.userPostFound) {
-            // Если пользователь не является владельцем поста, перенаправляем его
+          if (response.data.Users[0].username !== this.$store.state.auth.user.username) {
             this.$router.push("/");
             return;
           }
-          this.post = response.data.post;
+          this.post = response.data;
           this.loading = false;
-          console.log(response.data);
         })
         .catch((e) => {
           this.loading = false;

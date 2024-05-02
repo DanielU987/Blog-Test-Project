@@ -17,7 +17,7 @@
           </div>
           <div class="form-group">
             <label for="floatingPassword">Password</label>
-            <Field type="password" name="password" class="form-control text-primary" id="floatingPassword" />
+            <Field type="password" name="password" class="form-control" id="floatingPassword" />
             <small class="form-text text-warning"><ErrorMessage name="password" class="error-feedback" /></small>
           </div>
 
