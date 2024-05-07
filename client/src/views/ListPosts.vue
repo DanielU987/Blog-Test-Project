@@ -16,7 +16,7 @@
 
 
 <script>
-import PostCard from "@/views/PostCard.vue"; // Путь к вашему компоненту карточки поста
+import PostCard from "@/components/PostCard.vue"; // Путь к вашему компоненту карточки поста
 import { mapGetters } from "vuex";
 
 export default {
@@ -54,4 +54,7 @@ export default {
 </script>
 
 <style scoped>
+.col-12{
+  padding-right: 0;
+}
 </style>

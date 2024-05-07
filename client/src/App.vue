@@ -7,9 +7,9 @@
 </template>
 
 <script>
-import Navbar from "./views/Navbar.vue";
-import PostList from "@/components/ListPosts.vue";
-import Footer from "./views/Footer.vue"
+import Navbar from "./components/Navbar.vue";
+import PostList from "@/views/ListPosts.vue";
+import Footer from "./components/Footer.vue"
 
 export default {
   components: {

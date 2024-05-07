@@ -1,50 +1,53 @@
 <template>
-  <div class="container h-100">
-    <div class="row d-flex justify-content-center align-items-center h-100">
-      <div class="rounded-top text-white d-flex flex-row" style="background-color: #000; height: 200px">
-        <div class="ms-4 mt-5 d-flex flex-column" style="width: 150px">
-          <img src="//ssl.gstatic.com/accounts/ui/avatar_2x.png" alt="Default Profile Image"
-            class="img-fluid img-thumbnail mt-4 mb-2" style="width: 150px; z-index: 1" />
 
-          <button type="button" class="btn btn-outline-danger" data-mdb-ripple-color="dark" @click="deleteUserAndPosts"
-            style="z-index: 1">
-            Delete profile
+  <div v-if="loading" class="col-12 text-center">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+  <div v-else>
+
+
+
+    <div class="rounded-top text-black d-flex align-items-center mpx-2" style="background-color: white; position: relative;">
+      <!-- Left column for image and delete button -->
+      <div class="d-flex flex-column align-items-center ml-2" style="width: 150px">
+        <img src="//ssl.gstatic.com/accounts/ui/avatar_2x.png" alt="Default Profile Image"
+          class="img-fluid img-thumbnail mt-4 mb-2" style="width: 150px; z-index: 1" />
+      </div>
+
+      <!-- Right column for profile information -->
+      <div class="ms-3">
+        <h5>{{ this.profile.username }}</h5>
+        <p>{{ this.profile.email }}</p>
+      </div>
+
+      <!-- Dropdown button and menu -->
+      <div class="position-absolute top-0 end-0">
+        <div class="dropdown mr-1 mt-1">
+          <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
+            data-bs-toggle="dropdown" aria-expanded="false">
+            Actions
           </button>
-        </div>
-        <div class="ms-3" style="margin-top: 130px" v-if="this.profile">
-          <h5>{{ this.profile.username }}</h5>
-          <p>{{ this.profile.email }}</p>
-        </div>
-      </div>
-      <div class="p-4 text-black" style="background-color: #f8f9fa">
-        <div class="d-flex justify-content-end text-center py-1">
-          <div>
-            <p class="mb-1 h5">253</p>
-            <p class="small text-muted mb-0">Photos</p>
-          </div>
-          <div class="px-3">
-            <p class="mb-1 h5">1026</p>
-            <p class="small text-muted mb-0">Followers</p>
-          </div>
-          <div>
-            <p class="mb-1 h5">478</p>
-            <p class="small text-muted mb-0">Following</p>
-          </div>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton">
+            <li><a class="dropdown-item" href="#" @click="deleteUserAndPosts">Delete Profile</a></li>
+            <!-- Add more dropdown items as needed -->
+          </ul>
         </div>
       </div>
-
-        <div class="row">
-          <div v-for="post in posts" :key="post.id" class="col-12 mb-3">
-          <PostCard :post="post" />
-        </div>
-        </div>
+    </div>
+    <div class="row">
+      <div v-for="post in posts" :key="post.id" class="col-12 mb-3">
+        <PostCard :post="post" />
+      </div>
     </div>
   </div>
 
 </template>
+
 <script>
 import { mapState, mapActions, mapGetters } from 'vuex';
-import PostCard from "@/views/PostCard.vue"; // Путь к вашему компоненту карточки поста
+import PostCard from "@/components/PostCard.vue"; // Путь к вашему компоненту карточки поста
 
 export default {
   components: {
@@ -69,7 +72,7 @@ export default {
     posts() {
       return this.getPostsByUser(this.$route.params["username"])
     },
-   
+
   },
   mounted() {
     if (!this.currentUser) {
@@ -106,9 +109,7 @@ export default {
   position: relative;
 }
 
-.col-12{
-  padding:0
-}
+
 
 .image-container img {
   position: relative;
@@ -119,7 +120,6 @@ export default {
 }
 
 .card {
-  padding: 0;
   border-color: #373739;
 }
 

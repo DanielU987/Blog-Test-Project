@@ -17,13 +17,9 @@
       <div class="collapse navbar-collapse" id="navbarsExample03">
         <ul class="navbar-nav me-auto mb-2 mb-sm-0">
           <li class="nav-item">
-            <router-link to="/posts" class="nav-link">
-              <font-awesome-icon icon="home" /> Home
-            </router-link>
-          </li>
-          <li class="nav-item">
             <router-link to="/posts/create" class="nav-link">
-              <font-awesome-icon icon="plus" /> Create
+              Create
+              <font-awesome-icon icon="plus" /> 
             </router-link>
           </li>
         </ul>

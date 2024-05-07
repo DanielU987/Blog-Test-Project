@@ -66,7 +66,7 @@
                 </form>
                 <!-- Кнопка для показа всех комментариев -->
                 <button @click="toggleComments(post)" class="btn btn-sm btn-outline-light mt-2">
-                    {{ post.showAllComments ? 'Скрыть комментарии' : 'Показать все комментарии' }}
+                    {{ post.showAllComments ? 'Hide comments' : 'Show all comments' }}
                 </button>
             </div>
             <form v-else v-if="showCommentForm[post.id]" @submit.prevent="addComment(post.id)" class="flex-grow-1">
@@ -113,7 +113,7 @@ export default {
         ...mapMutations('comment', ['addCommentToPost']),
 
         toggleLike(postId) {
-            const post = this.getPostById(postId);
+            const post = this.post
             if (!post) return;
             const likeAction = post.isLiked ? "unlikePost" : "likePost";
 
@@ -150,8 +150,9 @@ export default {
                     content: this.commentInputs[postId]
                 });
                 console.log('Comment added successfully');
-
-                const post = this.posts.find(post => post.id === postId);
+                //console.log(this.posts)
+                //const post = this.posts.find(post => post.id === postId);
+                const post = this.post
 
                 const cooment = {
                     content: this.commentInputs[postId],

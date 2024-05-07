@@ -1,18 +1,18 @@
 import { createRouter, createWebHistory } from "vue-router";
-import Home from "./components/ListPosts.vue";
+import Home from "./views/ListPosts.vue";
 
-import EditPost from "./components/EditPost.vue";
+import EditPost from "./views/EditPost.vue";
 
-import RegisterUser from "./components/SignUp.vue";
-import LoginUser from "./components/Login.vue";
+import RegisterUser from "./views/SignUp.vue";
+import LoginUser from "./views/Login.vue";
 
-const CreatePost = () => import("./components/CreatePost.vue");
-const ViewPost = () => import("./components/ViewPost.vue");
+const CreatePost = () => import("./views/CreatePost.vue");
+const ViewPost = () => import("./views/ViewPost.vue");
 
-const Profile = () => import("./components/Profile.vue");
-const BoardAdmin = () => import("./components/BoardAdmin.vue");
-const BoardModerator = () => import("./components/BoardModerator.vue");
-const BoardUser = () => import("./components/BoardUser.vue");
+const Profile = () => import("./views/Profile.vue");
+const BoardAdmin = () => import("./views/BoardAdmin.vue");
+const BoardModerator = () => import("./views/BoardModerator.vue");
+const BoardUser = () => import("./views/BoardUser.vue");
 
 const routes = [
   { path: "/", component: Home },
