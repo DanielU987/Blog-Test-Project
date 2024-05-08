@@ -11,6 +11,8 @@ export const post = {
   actions: {
     async loadPosts({ commit, dispatch }) {
       try {
+        const vuexPersistedState = JSON.parse(localStorage.getItem("vuex"));
+console.log("Data stored by vuex-persistedstate:", vuexPersistedState);
         const userId = await dispatch("auth/getUserId", null, { root: true });
         if (!userId) {
           const response = await PostService.getAll();
@@ -24,7 +26,6 @@ export const post = {
         const posts = response.data;
         posts.forEach((post) => {
           post.isLiked = post.Likes.some((like) => like.UserId === userId);
-          // Сортировка комментариев по их ID в порядке возрастания
           post.Comments.sort((a, b) => a.id - b.id);
         });
         commit("setPosts", posts);
@@ -36,8 +37,8 @@ export const post = {
     },
     async likePost({ commit, state }, postId) {
       try {
-        await LikeService.likePost(postId, state.userId);
         commit("incrementPostLikes", postId);
+        await LikeService.likePost(postId, state.userId);
       } catch (error) {
         console.error("Error occurred while liking post:", error);
         throw error;
@@ -45,10 +46,40 @@ export const post = {
     },
     async unlikePost({ commit, state }, postId) {
       try {
-        await LikeService.unlikePost(postId, state.userId);
         commit("decrementPostLikes", postId);
+        await LikeService.unlikePost(postId, state.userId);
       } catch (error) {
         console.error("Error occurred while unliking post:", error);
+        throw error;
+      }
+    },
+    async createPost({ commit }, postData) {
+      try {
+        const response = await PostService.create(postData);
+        const createdPost = response.data;
+        commit("addPost", createdPost);
+        return createdPost;
+      } catch (error) {
+        console.error("Error occurred while creating post:", error);
+        throw error;
+      }
+    },
+    async updatePost({ commit }, postData) {
+      try {
+        const response = await PostService.update(postData.id, postData);
+        const updatedPost = response.data;
+        return updatedPost;
+      } catch (error) {
+        console.error("Error occurred while updating post:", error);
+        throw error;
+      }
+    },
+    async deletePost({ commit }, postId) {
+      try {
+        await PostService.delete(postId);
+        commit("removePostById", postId);
+      } catch (error) {
+        console.error("Error occurred while deleting post:", error);
         throw error;
       }
     },
@@ -84,6 +115,9 @@ export const post = {
     setUserId(state, userId) {
       state.userId = userId;
     },
+    removePostById(state, postId) {
+      state.posts = state.posts.filter((post) => post.id !== postId);
+    },
     incrementPostLikes(state, postId) {
       const post = state.posts.find((post) => post.id === postId);
       if (post) {
@@ -97,6 +131,9 @@ export const post = {
         post.Likes.pop();
         post.isLiked = false;
       }
+    },
+    addPost(state, post) {
+      state.posts.push(post); 
     },
   },
 };

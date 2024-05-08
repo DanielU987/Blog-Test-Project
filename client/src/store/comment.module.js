@@ -14,9 +14,6 @@ export const comment = {
     setComments(state, comments) {
       state.comments = comments;
     },
-    setPostId(state, postId) {
-      state.postId = postId;
-    },
     removeComment(state, commentId) {
       state.comments = state.comments.filter(
         (comment) => comment.id !== commentId

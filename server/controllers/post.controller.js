@@ -50,14 +50,21 @@ exports.findAll = (req, res) => {
       {
         model: User,
         attributes: ["id", "username", "email"],
-        include: Like
+        include: Like,
       },
       { model: Like },
-      { model: Comment, include: User },
+      {
+        model: Comment,
+        include: [
+          {
+            model: User,
+            attributes: ["id", "username", "email"],
+          },
+        ],
+      },
     ],
   })
     .then((data) => {
-      console.log(data)
       res.send(data);
     })
     .catch((error) => {
@@ -66,62 +73,6 @@ exports.findAll = (req, res) => {
     });
 };
 
-// Retrieve all Posts from the database.
-/*
-exports.findAll = (req, res) => {
-  Post.findAll()
-    .then((posts) => {
-      if (!posts || posts.length === 0) {
-        return res.status(404).send({ message: "No posts found" });
-      }
-
-      User.findAll({ raw: true })
-        .then((users) => {
-          const usersMap = users.reduce((acc, user) => {
-            acc[user.id] = user.username;
-            return acc;
-          }, {});
-
-          const postData = posts.map((post) => {
-            return UserPost.findOne({ where: { PostId: post.id } }).then(
-              (userPost) => {
-                const creatorName = userPost
-                  ? usersMap[userPost.UserId]
-                  : "Anon";
-                return {
-                  id: post.id,
-                  title: post.title,
-                  content: post.content,
-                  image: post.image,
-                  createdAt: post.createdAt,
-                  updatedAt: post.updatedAt,
-                  creator: creatorName,
-                };
-              }
-            );
-          });
-
-          Promise.all(postData)
-            .then((postDataResolved) => {
-              res.send(postDataResolved);
-            })
-            .catch((err) => {
-              console.error("Failed to resolve post data promises:", err);
-              res.status(500).send({ message: "Failed to retrieve post data" });
-            });
-        })
-        .catch((err) => {
-          console.error("Failed to retrieve users:", err);
-          res.status(500).send({ message: "Failed to retrieve users" });
-        });
-    })
-    .catch((err) => {
-      console.error("Failed to retrieve posts:", err);
-      res.status(500).send({ message: "Failed to retrieve posts" });
-    });
-};
-// Find a single Post with an id
-*/
 exports.findOne = (req, res) => {
   const PostId = req.params.id;
   Post.findByPk(PostId, {
@@ -138,80 +89,9 @@ exports.findOne = (req, res) => {
       res.status(500).send("Внутренняя ошибка сервера");
     });
 };
-/*
 
-
-exports.findOne = (req, res) => {
-  const PostId = req.params.id;
-  Post.findByPk(PostId)
-    .then((post) => {
-      if (!post) {
-        return res.status(404).send({ message: "Пост не найден" });
-      }
-
-      // Запрос для извлечения связи между пользователем и постом
-      UserPost.findOne({ where: { PostId: PostId } })
-        .then((userPost) => {
-          if (!userPost) {
-            return res
-              .status(404)
-              .send({ message: "Связь пользователя с постом не найдена" });
-          }
-
-          // Извлечение информации о пользователе
-          User.findByPk(userPost.UserId)
-            .then((user) => {
-              if (!user) {
-                return res
-                  .status(404)
-                  .send({ message: "Пользователь не найден" });
-              }
-
-              const creatorName = user.username || "Anon";
-
-              // Формирование данных о посте для отправки
-              const postData = {
-                id: post.id,
-                title: post.title,
-                content: post.content,
-                image: post.image,
-                creator: creatorName,
-                createdAt: post.createdAt,
-                updatedAt: post.updatedAt,
-              };
-
-              res.send(postData);
-            })
-            .catch((err) => {
-              console.error("Ошибка при получении пользователя:", err);
-              res.status(500).send({
-                message: "Произошла ошибка при получении пользователя.",
-              });
-            });
-        })
-        .catch((err) => {
-          console.error(
-            "Ошибка при получении данных о связи пользователь-пост:",
-            err
-          );
-          res.status(500).send({
-            message:
-              "Произошла ошибка при получении данных о связи пользователь-пост.",
-          });
-        });
-    })
-    .catch((err) => {
-      console.error("Ошибка при получении поста:", err);
-      res
-        .status(500)
-        .send({ message: "Произошла ошибка при получении поста." });
-    });
-};
-*/
-// Update a Post by the id in the request
 exports.update = (req, res) => {
   const id = req.params.id;
-
   Post.update(req.body, {
     where: { id: id },
   })
@@ -233,7 +113,6 @@ exports.update = (req, res) => {
     });
 };
 
-// Delete a Post with the specified id in the request
 exports.delete = (req, res) => {
   const id = req.params.id;
 

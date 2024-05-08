@@ -35,16 +35,12 @@
 </template>
 
 <script>
-import PostService from "../services/post.service";
-import { mapState } from "vuex";
+import { mapState, mapActions } from "vuex";
 import Compressor from 'compressorjs';
 
 export default {
   computed: {
-    ...mapState("auth", ["loggedIn", "user"]),
-    loggedIn() {
-      return this.$store.state.auth.status.loggedIn;
-    },
+    ...mapState("auth", ["user"]),
   },
   data() {
     return {
@@ -60,13 +56,13 @@ export default {
     this.loading = false
   },
   methods: {
+    ...mapActions("post", ["createPost"]), // Импортируем действие создания поста из хранилища
     savePost() {
-      if (!this.loggedIn) {
-        // Пользователь не вошел в систему
+      console.log(this.$store.state.auth.status)
+      if (!this.$store.state.auth.status) {
         console.log("User not logged in");
         return;
       }
-
       var data = {
         title: this.post.title,
         content: this.post.content,
@@ -74,14 +70,13 @@ export default {
         userId: this.user.id,
       };
 
-      PostService.create(data)
-        .then((response) => {
-          this.post.id = response.data.id;
-          console.log(response.data);
+      this.createPost(data) // Вызываем действие создания поста
+        .then(() => {
+          console.log("Post created successfully");
           this.$router.push("/");
         })
-        .catch((e) => {
-          console.log(e);
+        .catch((error) => {
+          console.error("Error occurred while creating post:", error);
         });
     },
     handleImageChange(event) {

@@ -98,6 +98,7 @@ export default {
         };
     },
     computed: {
+        
         isAuthenticated() {
             return !!this.$store.state.auth.user;
         },
@@ -149,9 +150,7 @@ export default {
                     userId: this.$store.state.auth.user.id,
                     content: this.commentInputs[postId]
                 });
-                console.log('Comment added successfully');
-                //console.log(this.posts)
-                //const post = this.posts.find(post => post.id === postId);
+
                 const post = this.post
 
                 const cooment = {
@@ -164,7 +163,7 @@ export default {
                 if (post && post.Comments) {
                     post.Comments.push(cooment);
                 }
-                console.log(post.Comments)
+
                 this.commentInputs[postId] = "";
             } catch (error) {
                 console.error('Error adding comment:', error);
@@ -213,7 +212,7 @@ export default {
   max-width: 100%;
   display: block;
   margin: 0 auto;
-  max-height: 800px;
+  max-height: 700px;
 }
 
 .card-footer {

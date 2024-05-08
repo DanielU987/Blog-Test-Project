@@ -5,7 +5,7 @@
         <span class="visually-hidden">Loading...</span>
       </div>
     </div>
-    <div v-else-if="posts && posts.length > 0" v-for="post in posts" :key="post.id" class="col-12 mb-3">
+    <div v-else-if="posts && posts.length > 0" v-for="post in posts" :key="post.id" class="col-10 mb-3">
       <PostCard :post="post" />
     </div>
     <div v-else class="col-12 text-center">

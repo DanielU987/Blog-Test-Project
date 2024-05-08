@@ -26,7 +26,6 @@ const routes = [
   { path: "/auth/profile/:username", component: Profile, name: "Profile" },
   { path: "/auth/mod", component: BoardModerator, name: "moderator" },
   { path: "/auth/admin", component: BoardAdmin, name: "admin" },
-  // Другие маршруты...
 ];
 
 const router = createRouter({
